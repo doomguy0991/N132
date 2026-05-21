@@ -1,0 +1,172 @@
+The transcript has been pasted below. It is from https://www.youtube.com/watch?v=pdqofxJeBN8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=2
+Your task is to create a **well-structured Jupyter Notebook (`.ipynb`)** that serves as a **complete standalone study note** for this lecture.
+
+The notebook should be designed so that:
+
+* A new student can learn the lecture content **without needing to watch the video**
+* The material flows naturally like a high-quality textbook chapter or university lecture note
+* Concepts are reorganized and improved where necessary for clarity and pedagogy
+* Important intuitions, mathematical derivations, mechanisms, and theoretical foundations are explained in depth
+
+The notebook should be **comprehensive and detailed**, because I plan to deeply study:
+
+* the mathematical foundations
+* the underlying mechanisms
+* derivations and proofs
+* intuition behind the theory
+* practical implications
+* implementation-related understanding
+
+Structure the notebook professionally using:
+
+* Clear section hierarchy
+* Table of contents
+* Markdown explanations
+* LaTeX equations
+* Diagrams/tables where useful
+* Code cells for demonstrations or experiments when appropriate
+* Summary sections
+* Key takeaways
+* Common pitfalls or misconceptions
+* Additional notes and insights beyond the transcript if necessary
+
+For every major topic:
+
+1. Start with intuition
+2. Introduce formal definitions
+3. Derive the mathematics step-by-step
+4. Explain why the method works
+5. Discuss assumptions and limitations
+6. Provide practical examples
+7. Connect concepts to broader machine learning ideas
+
+When mathematical concepts are introduced:
+
+* Do not skip derivation steps
+* Explain symbols carefully
+* Show intermediate reasoning
+* Include geometric/statistical interpretations where possible
+
+The notebook should feel like:
+
+* a mix of university lecture notes,
+* a self-study textbook chapter,
+* and an advanced annotated explanation of the lecture.
+
+Also:
+
+* Clean up transcript artifacts
+* Remove repetitions/filler speech
+* Convert spoken explanations into polished educational content
+* Preserve all important insights from the lecture
+
+Finally, generate the notebook in a polished educational style suitable for long-term reference and revision.
+
+IMPORTANT MODULAR GENERATION INSTRUCTIONS:
+
+DO NOT generate the entire notebook in a single response.
+
+Instead, follow this workflow strictly:
+
+PHASE 1 — MASTER NOTEBOOK ARCHITECTURE
+
+* First generate ONLY:
+
+  * the complete notebook architecture
+  * detailed section hierarchy
+  * subsection breakdown
+  * learning progression
+  * dependencies between sections
+  * estimated depth of each section
+  * which sections require:
+
+    * mathematical derivations
+    * proofs
+    * code examples
+    * visual intuition
+    * implementation discussion
+    * advanced theory expansions
+* Also define:
+
+  * notation conventions
+  * formatting conventions
+  * equation formatting style
+  * markdown/code cell organization strategy
+* DO NOT generate actual notebook content in this phase.
+
+PHASE 2 — SECTION-BY-SECTION GENERATION
+After the architecture is finalized:
+
+* Generate ONLY ONE major section at a time.
+* Each section must be self-contained and detailed.
+* Maintain consistency with:
+
+  * notation
+  * terminology
+  * formatting
+  * pedagogical flow
+  * equation style
+  * explanation depth
+
+At the start of every new section generation, keep track of:
+
+* previously completed sections
+* already introduced notation
+* previously derived equations
+* earlier assumptions and definitions
+
+EACH SECTION SHOULD:
+
+* Be output in notebook-ready format
+* Clearly separate markdown cells and code cells
+* Include deep explanations
+* Include derivations where relevant
+* Include intuition before formalism
+* Include summaries and transitions
+
+After completing each major section (or subsection if the section is large):
+
+STOP generation completely.
+Provide a short summary of what was completed.
+List:
+newly introduced concepts
+equations derived
+notation introduced
+dependencies for the next section
+Then wait for my approval before continuing.
+
+Do NOT automatically continue to the next section.
+
+This iterative workflow is important to:
+
+maintain consistency,
+avoid context-window degradation,
+ensure educational quality,
+and allow refinement before proceeding further.
+
+When continuing later sections:
+
+preserve all prior notation and definitions,
+avoid redefining previously explained concepts unless necessary,
+and maintain continuity across the notebook.
+
+If any section becomes too large:
+
+split it into multiple smaller notebook modules/subsections automatically.
+
+VERY IMPORTANT:
+
+* Never compress explanations merely to save space.
+* Preserve comprehensiveness.
+* Prioritize educational quality over brevity.
+* If a section becomes too long, split it further into subsections/sub-notebooks.
+
+OPTIONAL ADVANCED STRATEGY:
+For mathematically heavy sections, use multiple passes:
+
+1. Conceptual explanation pass
+2. Mathematical derivation pass
+3. Implementation/code pass
+4. Practical intuition/examples pass
+
+The final result should be a modular, deeply comprehensive notebook system that can later be merged into a single `.ipynb` without losing continuity or quality.

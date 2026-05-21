@@ -1,0 +1,1334 @@
+[00:00:05] We will be talking today about image
+[00:00:09] classification. Basically continuing our
+[00:00:11] our discussion on the topic of image
+[00:00:14] classification from last uh lecture and
+[00:00:18] we'll get a little bit into some
+[00:00:22] uh topics that gets us closer to neural
+[00:00:25] networks and and ultimately
+[00:00:27] convolutional neural networks and so on.
+[00:00:30] We'll start with linear classifiers.
+[00:00:36] Moving to the
+[00:00:39] next slide. This was the the syllabus
+[00:00:43] that we've talked about last uh lecture
+[00:00:48] in the in the previous lecture
+[00:00:51] where we did talk about three major
+[00:00:54] categories of
+[00:00:56] topics. Deep learning basics,
+[00:01:00] perceiving uh and understanding the
+[00:01:02] visual world, reconstructing and
+[00:01:05] interacting with the visual world as the
+[00:01:07] three major topics and and some sub um
+[00:01:12] topics that we will be covering in the
+[00:01:13] in the class and at at the end we will
+[00:01:16] have some discussions around the human-
+[00:01:19] centered AI aspects
+[00:01:21] and
+[00:01:24] today the goal is to cover the first
+[00:01:27] three items datadriven approaches. I
+[00:01:30] will I will try to tell you what this
+[00:01:32] means and
+[00:01:35] linear classification
+[00:01:37] as well as the K nearest neighbor
+[00:01:40] algorithm.
+[00:01:43] So
+[00:01:45] like last the previous lecture let's
+[00:01:49] start with our core task of
+[00:01:54] image classification. Again, it's a core
+[00:01:56] task in computer vision and we actually
+[00:02:00] come back to this task quite often
+[00:02:02] throughout the quarter because it's a
+[00:02:04] very good benchmark and we have some
+[00:02:06] examples to to tell you how the
+[00:02:09] algorithms work. So this is one of the
+[00:02:13] items that we come back to quite often.
+[00:02:17] We we want to define the the image
+[00:02:19] classification task today and then
+[00:02:24] introduce two of the datadriven
+[00:02:26] approaches for image classification. One
+[00:02:29] of them nearest neighbor and one of them
+[00:02:31] the other one near linear linear
+[00:02:33] classifier. There are some other
+[00:02:35] approaches which we have
+[00:02:38] listed in our backup slides and you're
+[00:02:41] welcome to to look at them after the
+[00:02:44] class.
+[00:02:45] But this is what we will be covering.
+[00:02:50] So what is image classification?
+[00:02:53] Given an image and
+[00:02:57] a number of predefined labels,
+[00:03:00] predetermined labels, a set of possible
+[00:03:03] labels such as in this example you see
+[00:03:06] dog, cat, truck, plane, and so on.
+[00:03:11] The job of the system is to assign one
+[00:03:14] of those labels to this uh image.
+[00:03:18] So
+[00:03:20] to us this is actually a very very easy
+[00:03:22] task because our brains our co cognitive
+[00:03:26] system is wired to
+[00:03:30] get a holistic understanding of this
+[00:03:32] image and assign a label to it. But when
+[00:03:35] it comes to coding this and and looking
+[00:03:38] at how a computer can make sense of this
+[00:03:40] image that's a that's completely a
+[00:03:43] different story
+[00:03:45] and we want to see how machines can make
+[00:03:49] sense of such data. So images are often
+[00:03:54] defined
+[00:03:56] by matrices of data
+[00:04:00] more broadly more generally tensors of
+[00:04:02] data
+[00:04:04] and often the numbers are the each of
+[00:04:06] the pixel values are between zero and
+[00:04:10] 255 which is a 8 bit um data structure
+[00:04:15] and since this is an image a colored
+[00:04:19] image
+[00:04:21] assuming that it's with a resolution of
+[00:04:25] 800 by 600.
+[00:04:28] Since it's an R RGB image, it has three
+[00:04:30] channels of red, green, and blue RGB.
+[00:04:33] And therefore, it's a tensor of 800 by
+[00:04:38] 600 by 3 as you can see on the slide.
+[00:04:43] So, um,
+[00:04:47] as you can probably guess, this is the
+[00:04:51] semantic gap between our perception of
+[00:04:54] this image and how the machine perceives
+[00:04:56] and and sees the the image, right? And
+[00:05:00] in order to be able to uh even
+[00:05:03] understand how this this could be very
+[00:05:06] challenging let's look at some some
+[00:05:09] challenges some some variations in this
+[00:05:11] type of imaging u data. So let's assume
+[00:05:15] for example as as one example let's
+[00:05:17] assume that um we move the camera if the
+[00:05:21] camera is moved for example panning the
+[00:05:24] camera around
+[00:05:26] even if the cat sits completely and
+[00:05:28] perfectly still all of those pixel
+[00:05:32] values every single pixel value of 800
+[00:05:35] by 600 by3 will be changed.
+[00:05:41] So all these pixels will have a new
+[00:05:43] value. Again, for us humans, it's the
+[00:05:49] same object. There's no absolutely no
+[00:05:52] difference. But from a computer's
+[00:05:53] perspective, it's completely a new data
+[00:05:56] point. So this is one of the challenges,
+[00:06:01] but there are quite a few
+[00:06:04] others as well. For example,
+[00:06:06] illumination is another um challenge.
+[00:06:12] So if you've seen or if you've taken
+[00:06:15] courses in graphics or maybe uh other
+[00:06:18] other vision courses
+[00:06:20] and or digital image processing uh
+[00:06:23] courses for engineering applications
+[00:06:25] you know that the value of each RGB uh
+[00:06:29] pixel the RGB values are a function of
+[00:06:35] the surface material color and their
+[00:06:38] light source
+[00:06:40] and and that's Why same cat, same object
+[00:06:44] may look at differently in terms of
+[00:06:47] numbers when it comes to
+[00:06:50] uh being pictured in different
+[00:06:53] illumination conditions.
+[00:06:55] With that uh in mind, so whether the cat
+[00:06:59] is in a dark room or under the sun,
+[00:07:01] still it's the cat. It's it's it's one
+[00:07:03] cat. But um this is creating challenges
+[00:07:07] for for the machine. Can you maybe name
+[00:07:09] some other other challenges that um may
+[00:07:13] change the the values of the pixels and
+[00:07:17] create problems for the machine to to
+[00:07:19] recognize objects
+[00:07:22] other than illumination and viewpoint
+[00:07:24] changes that I mentioned. So background
+[00:07:27] background clutter background objects
+[00:07:29] yes which is actually our next slide.
+[00:07:33] Yes, background uh clutter is another
+[00:07:36] challenge. What? Anything else?
+[00:07:40] Zooming in and out. Yes. So, the scale
+[00:07:43] basically of the object in the in the
+[00:07:46] image. Yes. What else? The resolution of
+[00:07:50] the image that is that could be
+[00:07:53] considered as that's definitely a
+[00:07:56] challenge. But often with um machine
+[00:07:59] learning models or or any model that we
+[00:08:01] want to recognize action um objects in
+[00:08:04] in images since we normalize the size of
+[00:08:08] the image resolution may not be that uh
+[00:08:11] important unless there is zooming
+[00:08:13] effects of the the objects. Occlusion is
+[00:08:16] one of the major problems. Again as
+[00:08:19] humans it's very easy to say this is cat
+[00:08:22] these are cats. Even the last one which
+[00:08:24] is actually a very challenging the one
+[00:08:26] on the on the right. You can only see a
+[00:08:29] tail and a little bit of probably paw in
+[00:08:32] in the right side.
+[00:08:37] One could say yes that could be a tiger
+[00:08:40] or it could be I don't know a raccoon
+[00:08:43] with a tiny tail. But because this is
+[00:08:47] because of the context, because we know
+[00:08:49] this is inside a living room on a couch,
+[00:08:52] most probably it's a cat. It's a cat. So
+[00:08:55] again, for us humans, it's not that
+[00:08:58] hard. Beyond that, there are many other
+[00:09:02] problems. Deformation cats are very
+[00:09:05] deformable. So
+[00:09:08] they
+[00:09:10] create challenges for for algorithms to
+[00:09:14] be uh detected recognized.
+[00:09:18] I mean not today's algorithms generally
+[00:09:20] for building uh step-by-step um
+[00:09:24] algorithms that can detect objects. So
+[00:09:26] deformation is one of the other major
+[00:09:30] challenges
+[00:09:31] and beyond that the intra class
+[00:09:36] variation is one more important
+[00:09:41] challenge.
+[00:09:44] We know that cats uh can come in
+[00:09:46] different sizes, colors, patterns or
+[00:09:49] even they can they have different breeds
+[00:09:51] and all of those are still cats. But um
+[00:09:56] for the for the machines it's it's not
+[00:09:59] that easy to recognize the intraclass
+[00:10:03] variations.
+[00:10:04] One other interesting challenge is the
+[00:10:08] context
+[00:10:09] because
+[00:10:11] if you only look at that
+[00:10:15] that part that that image on the right
+[00:10:17] or if an algorithm looks at this without
+[00:10:21] considering the context it's very easy
+[00:10:23] to classify this as a tiger or some
+[00:10:27] other animal. But because of the context
+[00:10:30] and because we know that there's the
+[00:10:33] effect of shadows and so on, this could
+[00:10:37] probably be classified correctly.
+[00:10:41] So,
+[00:10:46] but the thing is that the classifiers
+[00:10:47] that we have today can do really great
+[00:10:51] job, a good jobs at
+[00:10:55] classifying the images, identifying the
+[00:10:58] objects in images. Thanks to efforts
+[00:11:02] like ImageNet and also all of the
+[00:11:04] follow-up works that created larger
+[00:11:07] scale benchmarks for training larger
+[00:11:11] scale models and um
+[00:11:16] and and in this class what we want to do
+[00:11:18] is to get to uh to a place that we build
+[00:11:23] models that can recognize activ u
+[00:11:26] recognize objects and also other um
+[00:11:30] aspects. within the image. For the rest
+[00:11:32] of this class, we are going to be
+[00:11:35] working towards building step by step
+[00:11:38] the building blocks that are needed for
+[00:11:40] building those large algorithms. And
+[00:11:44] before doing so, uh we have to look at
+[00:11:50] the most basic building block
+[00:11:53] of classifying an image and that is
+[00:11:57] building implementing a function like
+[00:12:00] this. So if you've taken some of the
+[00:12:05] computer science or engineering courses
+[00:12:07] that often build
+[00:12:10] frameworks through algorithms like for
+[00:12:12] example sorting in uh as a as a computer
+[00:12:16] algorithm it's often it often comes with
+[00:12:19] some if then else rules and some for
+[00:12:23] loops and so on. So there's there's a
+[00:12:25] clear flowchart of um tasks and
+[00:12:30] step steps if then else steps that
+[00:12:33] creates an algorithm for sorting. But
+[00:12:36] when it comes to images and
+[00:12:38] understanding the visual world that is
+[00:12:42] um not happening that is a challenge
+[00:12:45] there is no way to hardcode the steps
+[00:12:49] for classifying images. Although
+[00:12:52] there has been some efforts um in this
+[00:12:55] space, there are papers
+[00:12:58] that
+[00:13:00] they've they've uh tried to come up with
+[00:13:03] algorithms and steps to recognize
+[00:13:06] objects. And one of those was based on
+[00:13:10] um edge detectors,
+[00:13:13] finding the edges in
+[00:13:16] um in in the image as a first step. And
+[00:13:19] then after after creating all of these
+[00:13:23] patterns, look at
+[00:13:26] uh the important patterns. for example,
+[00:13:28] corners. Extract some features that are
+[00:13:31] around the corners or count the number
+[00:13:34] of specific types of corners and based
+[00:13:37] on those from those try to map that into
+[00:13:43] the output class. So while this is been
+[00:13:47] an interesting effort and and it had
+[00:13:50] some success on very limited um
+[00:13:54] variability of type of images but this
+[00:13:57] is very hard to first it's very hard to
+[00:14:00] scale these types of algorithms. Even if
+[00:14:02] it works it's very hard to scale because
+[00:14:07] you have to create these rules and
+[00:14:09] everything for every single object that
+[00:14:11] you want to recognize. and second
+[00:14:14] finding the logic for each of those
+[00:14:17] requires a lot of uh effort by itself as
+[00:14:20] well. So because of these challenges, I
+[00:14:23] think um
+[00:14:25] these types of algorithms which are u
+[00:14:28] based on creating logics and procedures
+[00:14:32] for detecting objects or classifying
+[00:14:35] images have not been quite successful
+[00:14:38] and machine learning comes with this
+[00:14:41] datadriven approach. So with this new
+[00:14:44] paradigm of and another paradigm of
+[00:14:48] looking at this problem from a
+[00:14:51] datadriven
+[00:14:53] perspective,
+[00:14:55] we define a a procedure of a three-step
+[00:14:59] process and the first one is to collect
+[00:15:05] data sets of images and their labels. So
+[00:15:09] there are many different ways of if you
+[00:15:11] have if you want to recognize a specific
+[00:15:14] type of object
+[00:15:16] we or or specific types of objects we
+[00:15:20] can look for data sets or single data
+[00:15:24] points over the internet to create a
+[00:15:27] data many samples from each of the
+[00:15:30] examples.
+[00:15:32] We used to be doing this 10 20 years ago
+[00:15:35] uh using search engines and image search
+[00:15:38] engines over the internet to create
+[00:15:41] these types of data sets. Now we have
+[00:15:44] all of the data sets. So
+[00:15:48] and then the second step is using
+[00:15:50] machine learning algorithms to train a
+[00:15:52] classifier. basically build a function
+[00:15:57] train that takes the
+[00:16:00] images in the training data and their
+[00:16:03] associated labels and builds a model
+[00:16:06] that can relate associate images with
+[00:16:09] the labels. And then um the last step
+[00:16:13] would be evaluating the classifier on
+[00:16:16] new
+[00:16:18] images
+[00:16:20] which means implementing a function
+[00:16:23] called predict that takes the model and
+[00:16:27] some test images and for those test
+[00:16:29] images that were were not part of the
+[00:16:32] training images um predicts the labels
+[00:16:35] and returns those as the output. So a
+[00:16:40] very simple procedure but instead of
+[00:16:44] building a logic we are building a
+[00:16:46] datadriven approach for it.
+[00:16:50] As I said we want to talk about two
+[00:16:53] popular methods and and classifiers. One
+[00:16:56] of them is nearest neighbor classifier.
+[00:16:59] This is the easiest form of
+[00:17:01] classification. Um, and
+[00:17:05] we specifically want to go over this
+[00:17:08] because we can learn some of the
+[00:17:11] concepts
+[00:17:14] around building these classifiers and
+[00:17:16] it's easier to explain some um
+[00:17:21] some of the details and then we'll move
+[00:17:23] to the topic of linear classification.
+[00:17:26] Okay. to do that what we do uh to build
+[00:17:30] the nearest neighbor classifier as as I
+[00:17:32] said we need to build the train and
+[00:17:36] predict functions the train function
+[00:17:39] needs to just memorize all of the data
+[00:17:42] and labels so the training function
+[00:17:44] basically doesn't do anything other than
+[00:17:46] keeping everything in the memory and
+[00:17:48] then the prediction function the predict
+[00:17:51] uh function
+[00:17:53] looks for the most similar training
+[00:17:56] image basically It creates a lookup
+[00:17:58] table of all of the images and all of
+[00:18:01] their labels. And during the prediction
+[00:18:05] or testing time, what what it does is
+[00:18:08] tries to find the closest one, the the
+[00:18:11] most similar image and outputs the label
+[00:18:15] for that image. Let's look at an
+[00:18:18] example. So assuming that we have these
+[00:18:21] five
+[00:18:23] as in your in our training data then yes
+[00:18:27] you you see my cursor and then um this
+[00:18:32] is the query image the input image for
+[00:18:34] for prediction. What we want to do is to
+[00:18:37] see which of these training data and
+[00:18:40] training images is the most similar to
+[00:18:42] this one and for that we need a distance
+[00:18:45] function. So this distance function
+[00:18:48] needs to take the two images each pair
+[00:18:51] of images each of these images compared
+[00:18:53] to the query image and return a value
+[00:18:58] which defines the similarity between
+[00:19:01] these two
+[00:19:04] uh inputs these two images. There are
+[00:19:07] many different ways of doing that. One
+[00:19:10] of the most popular ones is
+[00:19:13] L1 distance which is defined as the sum
+[00:19:17] over all absolute values of pixel
+[00:19:21] differences
+[00:19:22] between the two images image I1 and I2.
+[00:19:26] As an example, if this is a testing
+[00:19:27] image,
+[00:19:29] if we
+[00:19:31] want to calculate the distance of this
+[00:19:34] image with
+[00:19:36] uh an image in the training data, we do
+[00:19:39] a pixel wise subtraction
+[00:19:42] and the difference between the pixel
+[00:19:44] values and then sum them up which
+[00:19:46] defines this new this value as
+[00:19:52] as the uh the distance between these two
+[00:19:56] So
+[00:19:59] this is the most basic distance function
+[00:20:01] but it's actually very useful in many
+[00:20:05] applications. We'll be coming back to
+[00:20:07] this uh L1 and and any other variations
+[00:20:10] of distances in the class quite often
+[00:20:13] with this very simple definition. We
+[00:20:15] want to see how we can get it get this
+[00:20:17] implemented. As I said the first step is
+[00:20:20] to just memorize the training data. So
+[00:20:23] the train function just keeps the data
+[00:20:26] in the memory and then
+[00:20:30] what the predict function does using
+[00:20:34] actually some um Python libraries and
+[00:20:37] numpy and so on. We can implement this
+[00:20:40] in just four lines. We calculate the
+[00:20:43] distances between each of the testing
+[00:20:46] samples
+[00:20:48] and the training data.
+[00:20:53] Take the minimum for each of the testing
+[00:20:56] samples and then output the label for it
+[00:21:02] for the for the for the one with mean
+[00:21:04] index. So this is going to be the uh
+[00:21:09] implementation for for the predict
+[00:21:11] function. Yeah, the the pixel values as
+[00:21:14] I explained
+[00:21:18] the most the the the simplest form this
+[00:21:21] is a tensor of 800 by 600 by3
+[00:21:26] and three channels and these are RGB
+[00:21:29] values for each of the pixel uh
+[00:21:31] locations. So yes the I should actually
+[00:21:35] repeat the questions for online students
+[00:21:36] too and the question was the pixel
+[00:21:39] values what do they represent? Yeah. So
+[00:21:42] the next question is why it's between 0
+[00:21:44] and 255. Um so the there are many
+[00:21:48] different standards for storing images.
+[00:21:52] The most popular one that we use in in
+[00:21:55] almost all images that you see online
+[00:21:58] and uh and here they are RGB. RGB is a
+[00:22:02] 24bit format sometimes 32 because
+[00:22:06] there's an another channel alpha. We
+[00:22:08] don't want to get into uh into those but
+[00:22:11] the 24bit format it means that for each
+[00:22:15] of the channels for each of the three
+[00:22:17] channels of red green and blue which
+[00:22:19] create all of all color color
+[00:22:21] combinations we can have eight bits. So
+[00:22:25] that's that's the standard that is uh
+[00:22:27] defined. There are some other frameworks
+[00:22:30] too but this is the most popular one.
+[00:22:34] So um with that let me
+[00:22:38] go back to the code and ask you a
+[00:22:40] question.
+[00:22:46] So
+[00:22:47] [Applause]
+[00:22:49] I know some of the students uh most of
+[00:22:51] the students um come with engineering
+[00:22:54] backgrounds and a little bit of computer
+[00:22:56] science as well. But we want to see
+[00:23:00] with say n samples n examples that we
+[00:23:03] have in the training data how fast the
+[00:23:06] training and prediction happens.
+[00:23:11] I'm hoping that you're familiar with the
+[00:23:14] big O notation that we often u represent
+[00:23:19] computational and sometimes space
+[00:23:21] complexities with. But here if you look
+[00:23:25] at the the algorithms I'll I'll go with
+[00:23:27] the training data in the in the training
+[00:23:30] function uh and then I want you to help
+[00:23:32] me with the
+[00:23:35] the dancer for prediction for the
+[00:23:37] training step the the training is of 01
+[00:23:42] because we are not actually doing
+[00:23:44] anything we are not even moving any data
+[00:23:46] we're just keeping the copy of the data
+[00:23:49] in the memory so no operations it means
+[00:23:52] that without operations with and
+[00:23:54] operations of order one we can
+[00:23:59] complete the training step. What about
+[00:24:01] the prediction step? For each of the
+[00:24:05] single examples of
+[00:24:09] the um the training the testing data,
+[00:24:12] how many operations should we should we
+[00:24:14] take? And uh yes, if we have n training
+[00:24:19] data, it means that we have to calculate
+[00:24:21] the distance of every single uh testing
+[00:24:23] image with all of the images in the
+[00:24:26] training data. So at least in the order
+[00:24:29] of n operations.
+[00:24:33] So
+[00:24:36] this is um this is this is not really
+[00:24:40] good because what we often want to do is
+[00:24:43] because training is not doing anything
+[00:24:46] but during testing during prediction
+[00:24:48] time we are spending so much time uh
+[00:24:51] just to do comparisons with between the
+[00:24:54] data and the each single data point and
+[00:24:58] the training examples.
+[00:25:00] This would be similar to
+[00:25:03] the fact that each single time that you
+[00:25:05] ask that GPT a question, it will try to
+[00:25:09] see what the answer is and compare it
+[00:25:11] with all of the possible answers over
+[00:25:14] the internet, which will take years and
+[00:25:17] then return your your your response,
+[00:25:19] right? So it it wouldn't work when it
+[00:25:21] wants to it wants to scale for very
+[00:25:23] simple problems. We used to be using
+[00:25:25] these types of approaches. So what we
+[00:25:28] often want is to
+[00:25:32] build classifiers uh that are fast
+[00:25:35] during prediction. They they do it much
+[00:25:38] faster but it's okay if they take a lot
+[00:25:40] of time to do uh during the training
+[00:25:42] because that could be done offline. So
+[00:25:45] with that um in mind although there has
+[00:25:49] been a lot of efforts making uh nearest
+[00:25:53] neighbor more
+[00:25:55] much faster
+[00:25:57] using GPUs and so on which are beyond
+[00:26:00] the the scope of this class. If you're
+[00:26:02] interested you can take a look at those.
+[00:26:04] But with that I want to look at some of
+[00:26:06] the visualizations and and how this this
+[00:26:09] algorithm in general works. So given
+[00:26:13] this space that we have five classes of
+[00:26:16] red, blue, green, purple and red sorry
+[00:26:19] yellow. Um
+[00:26:23] and each dot represents one one training
+[00:26:26] sample in that class.
+[00:26:29] If you partition the space for every
+[00:26:31] single point, you see that we can we can
+[00:26:35] create these five partitions. um let's
+[00:26:38] say five or in this case six different
+[00:26:40] partitions that
+[00:26:44] each point um if if you have a testing
+[00:26:47] sample that is in that specific region
+[00:26:50] the color of that region shows what the
+[00:26:53] nearest neighbor for that sample will
+[00:26:56] be. So this this is going to be the
+[00:27:01] nearest neighbor algorithm. One nearest
+[00:27:03] neighbor algorithm partition the space
+[00:27:05] in this um setting. But do you see a
+[00:27:09] problem here in this uh example? So the
+[00:27:13] yellow one is is exactly is in the
+[00:27:16] middle of all of the greens. And this
+[00:27:17] means that probably that's an outlier.
+[00:27:20] That's probably a noise. And this is the
+[00:27:22] case for many many problems that we have
+[00:27:24] to solve. And with that um
+[00:27:29] the reason that u there are there is
+[00:27:32] this this big yellow region in the
+[00:27:34] middle is just this single point and
+[00:27:38] because you're only using one nearest
+[00:27:41] neighbor this happens. So to make it a
+[00:27:43] little bit more robust we can increase
+[00:27:45] the number of nearest neighbors that we
+[00:27:48] take which turns the nearest neighbor
+[00:27:50] algorithm into a k nearest neighbor. And
+[00:27:53] we often
+[00:27:55] select more than one
+[00:27:58] point or or sample. And we often take
+[00:28:02] the majority voting for
+[00:28:06] for identifying the label for any given
+[00:28:09] testing sample testing image.
+[00:28:14] But the problem that uh you can see here
+[00:28:16] is now we have some white regions. Those
+[00:28:20] white regions are areas that we cannot
+[00:28:22] make a decision a complete decision
+[00:28:24] because those areas are areas that we
+[00:28:28] have equal number of samples from the
+[00:28:31] neighbors um from the three different
+[00:28:35] classes and there's no way to identify
+[00:28:38] what the label of that per that example
+[00:28:42] in the in the white region is. And for
+[00:28:45] for you if you create these these types
+[00:28:47] of spaces for your problems this means
+[00:28:50] that if if you look at these type spaces
+[00:28:52] it means that those are good regions to
+[00:28:54] go and collect more data for. So those
+[00:28:57] are unclear spaces. So it's a good way
+[00:29:00] of finding regions that are important
+[00:29:04] for data uh more data collection. Okay.
+[00:29:07] So we can go larger on the value of the
+[00:29:10] K. But one of the choices that we have,
+[00:29:14] one of the
+[00:29:16] um
+[00:29:18] factors that that plays an important
+[00:29:20] role is the value of K. But if you
+[00:29:23] remember, we had another decision to
+[00:29:25] make which was the distance function. We
+[00:29:28] talked about the L1 distance. Again, sum
+[00:29:31] of all of the absolute values
+[00:29:35] between pair-wise differences of um the
+[00:29:39] pixels.
+[00:29:41] And
+[00:29:44] if I visualize the L1 distance or
+[00:29:47] sometimes in some context we call it
+[00:29:49] Manhattan distance,
+[00:29:52] the the distance function is is kind of
+[00:29:56] visualized in this way.
+[00:29:58] If I calculate if I if I look at this
+[00:30:00] square that I have in the
+[00:30:04] in this space all of the points on that
+[00:30:08] square are they have a same distance
+[00:30:12] from the origin from the center point.
+[00:30:15] So
+[00:30:17] this is a good way of visualizing and
+[00:30:19] seeing how uh this L1 distance function
+[00:30:22] works. Another popular framework,
+[00:30:24] another popular distance function that
+[00:30:26] we use is L2 which instead of the
+[00:30:31] absolute value calculates the square of
+[00:30:34] the differences sums it up but because
+[00:30:37] of the square we also do a square root
+[00:30:40] and visualizing that we'll get the
+[00:30:43] circle
+[00:30:44] um
+[00:30:47] visualization where each of the points
+[00:30:51] on the circle are they have the same
+[00:30:53] distance from the from the center from
+[00:30:55] the origin. So this visualization
+[00:30:58] actually helps us understand the
+[00:30:59] differences between these distances too
+[00:31:01] and these are the the most basic and
+[00:31:03] easiest distance functions that we can
+[00:31:05] use. So there are again a lot more the
+[00:31:09] um the reason this visualization is
+[00:31:12] helpful is because sometimes if you
+[00:31:15] rotate the so x and y in these two
+[00:31:17] visualizations are basically the
+[00:31:19] features. If we have two pixel values,
+[00:31:22] two two features then they have this 2D
+[00:31:24] space and this X and Y are often those
+[00:31:28] features. So if I rotate these features
+[00:31:33] meaning if I use other types of features
+[00:31:36] this L1 will have a different different
+[00:31:38] framework different value while it's not
+[00:31:40] any different for L2. So that's why this
+[00:31:44] is a big difference between L1 and L2.
+[00:31:47] And sometimes if our features are are
+[00:31:49] very specific and meaningful and we want
+[00:31:51] to preserve their information, often L1
+[00:31:54] is is is more important is is better
+[00:31:56] because it has um kind of as you can see
+[00:32:02] um a shape that preserves and and
+[00:32:06] enforces distances based on the
+[00:32:08] features. But if uh there is features
+[00:32:12] are more arbitrary then L2 distance
+[00:32:14] makes more sense. If I um want to
+[00:32:17] calculate the distance so the distance
+[00:32:20] of all of the points on this shape
+[00:32:22] from the origin are exactly the same
+[00:32:26] right if I use the L1 distance. But for
+[00:32:30] L2 distance,
+[00:32:32] the points on this circle have the same
+[00:32:35] distance from uh the center uh or the
+[00:32:38] origin of this uh
+[00:32:42] this space. So um that's basically the
+[00:32:46] the main
+[00:32:50] what what these two images are showing.
+[00:32:52] Any point on this shape
+[00:32:56] when using an L1 distance have the same
+[00:32:58] distance from the origin and for the
+[00:33:00] circle any point on the circle if you're
+[00:33:03] using L2 distance will have the same
+[00:33:06] distance from the origin.
+[00:33:08] Yeah. Why it's important to is better to
+[00:33:11] use L1 if we want to preserve the
+[00:33:14] features. So to answer that question, if
+[00:33:18] I rotate the feature um axis the the
+[00:33:23] distances and this distance function
+[00:33:25] changes completely, right? While if I do
+[00:33:29] the same here,
+[00:33:31] nothing changes. It's it's the exact
+[00:33:34] same value of the uh features, right? Uh
+[00:33:37] distance, sorry. So in this case L1 is
+[00:33:42] very sensitive on the feature values
+[00:33:44] while L2 is not. If you select another
+[00:33:48] feature in the same space that is having
+[00:33:50] a different creates a different shape
+[00:33:52] then your L function the distance
+[00:33:55] function changes as well. So if I draw
+[00:33:59] the lines here again the question for
+[00:34:02] online students is why it changes if we
+[00:34:04] rotate. If I select another feature that
+[00:34:07] goes from this side, right, then the
+[00:34:10] lines will look different,
+[00:34:12] right? So if you rotate the this thing,
+[00:34:18] but it's for that shape, it's not it's
+[00:34:20] agnostic, right?
+[00:34:24] So with these two distance functions
+[00:34:26] that we talked about, if I revisualize
+[00:34:29] the
+[00:34:31] um space you can see with K equals to
+[00:34:35] one with one nearest neighbor with L1
+[00:34:37] and L2 these are the space
+[00:34:40] partitionings. One of the interesting
+[00:34:43] things that you can see here is that
+[00:34:45] with L1
+[00:34:48] uh function most of the part most of the
+[00:34:51] boundaries are
+[00:34:53] parallel to the the the two axis the two
+[00:34:56] features X uh one and X2 very much
+[00:35:00] sensitive to the features while there we
+[00:35:02] have a little bit of more smooth
+[00:35:05] uh boundary separation.
+[00:35:08] So there is a tool online on the lab
+[00:35:11] website that you can uh play around with
+[00:35:14] with this with different distance
+[00:35:16] functions and different number of K. You
+[00:35:19] can you can see you can create a
+[00:35:20] different setup. So you can play around
+[00:35:23] with it. But why did we talk about
+[00:35:26] nearest neighbor to begin with first?
+[00:35:28] Yes, it's it's the easiest um problem to
+[00:35:32] solve, easiest solution, easiest
+[00:35:35] datadriven approach and um great to
+[00:35:39] start with. But one of the main reasons
+[00:35:41] that we
+[00:35:42] >> we want to iterate and and discuss
+[00:35:46] nearest neighbor is the fact that we can
+[00:35:51] look into the the the topic of
+[00:35:53] hyperparameters.
+[00:35:55] Hyperparameters are often
+[00:35:58] some of the
+[00:36:00] variables that you have to make a
+[00:36:02] decision on to be able to run your
+[00:36:05] algorithm. In this case, the value k
+[00:36:10] the number of nearest neighbors is
+[00:36:12] defined is is a hyperparameter.
+[00:36:15] Depending on how many number of uh
+[00:36:18] nearest neighbors you take, your outputs
+[00:36:20] will be different. And then another
+[00:36:23] choice that you have here is the
+[00:36:25] distance function.
+[00:36:27] So the
+[00:36:31] choice of hyperparameters are often very
+[00:36:33] much data set dependent and sometimes
+[00:36:36] problem dependent
+[00:36:40] and we have to have a way to identify
+[00:36:43] those to kind of optimize for them
+[00:36:48] for each single problem. And that's what
+[00:36:51] does what is often referred to as
+[00:36:52] hyperparameter tuning in machine
+[00:36:55] learning algorithms in in deep learning
+[00:36:56] algorithms and so on. And how to do
+[00:36:59] that? How to set
+[00:37:02] the hyperparameters? There are different
+[00:37:03] approaches. One of them is to choose the
+[00:37:06] hyperparameters that that work the best
+[00:37:09] for the training data. So you have a set
+[00:37:12] of images or data in in your training
+[00:37:15] data. You look for
+[00:37:18] the best set of hyper hyperparameters
+[00:37:20] that generates the best training
+[00:37:23] uh or
+[00:37:25] minimum training loss. While it works
+[00:37:29] for the training data, it's not a good
+[00:37:31] idea at all because especially with near
+[00:37:35] nearest neighbor, K equal to one is
+[00:37:37] always the best the best value, right?
+[00:37:40] Because you're you're memorizing
+[00:37:41] training data. So K equal to one will
+[00:37:43] give give you always the 100% accuracy.
+[00:37:47] So we know that this is this is not a
+[00:37:50] great idea. The second one is
+[00:37:54] choosing hyperparameter that works best
+[00:37:56] for for a held out testing set.
+[00:38:00] While this is a little bit better than
+[00:38:03] the first one,
+[00:38:05] there is also a big problem here. Can
+[00:38:07] can anybody say why this is a problem
+[00:38:11] exactly? And so it's it's it's kind of
+[00:38:13] cheating because you are trying to find
+[00:38:15] the best hyperparameter that works on
+[00:38:17] the testing data and you don't know how
+[00:38:20] the model will work on any other data
+[00:38:24] points not not in the testing set. So
+[00:38:27] yes that is that is exactly right. It's
+[00:38:31] not a good idea because we don't know
+[00:38:33] how the model will generalize and for
+[00:38:36] sure never do it do this as as as we
+[00:38:40] talked about it's kind of cheating and a
+[00:38:43] better idea is to always separate take
+[00:38:47] some part of the training data as
+[00:38:49] validation set
+[00:38:51] and train your model on the training
+[00:38:53] data on the train portion of the the new
+[00:38:56] portion that we call train and then Try
+[00:39:00] to find or optimize your hyper
+[00:39:03] hyperparameter on the validation set and
+[00:39:06] after you've found the best set of
+[00:39:09] hyperparameters then use those
+[00:39:12] hyperparameters to replicate the results
+[00:39:14] for the testing set and do the
+[00:39:16] predictions for the testing set. So this
+[00:39:17] is a much better approach although it
+[00:39:21] does have some uh challenges itself
+[00:39:25] because um
+[00:39:29] sometimes the the validation set that
+[00:39:31] you've selected it may not be a good
+[00:39:33] representative of the entire landscape
+[00:39:36] because you your validation set is
+[00:39:38] almost always much smaller and and
+[00:39:41] that's why one of the a better approach
+[00:39:44] is to use um
+[00:39:49] cross validation for setting
+[00:39:50] hyperparameters.
+[00:39:52] Basically you split your training data
+[00:39:55] into a number of folds, a number of uh
+[00:39:58] partitions here in this case five and
+[00:40:02] each of the folds
+[00:40:05] plays as the validation set once and
+[00:40:08] iteratively you you run this five times
+[00:40:10] for five-fold class validation. You do
+[00:40:13] this five times and average the
+[00:40:17] accuracies. So you set a a value of the
+[00:40:19] hyperparameter. You run this for all
+[00:40:21] these five uh sets.
+[00:40:24] Define the accuracy. Calculate the
+[00:40:26] accuracy on the validation set. Average
+[00:40:29] it. And then you do this multiple times
+[00:40:31] to find the best setting for the
+[00:40:33] hyperparameter. After you found the
+[00:40:35] hyperparameter setting, you apply to the
+[00:40:37] testing set. This is a little bit more
+[00:40:40] reliable and and generates much better
+[00:40:43] results. Although in larger scale deep
+[00:40:45] learning it is less
+[00:40:49] practiced because repeating this
+[00:40:52] multiple times and five times with huge
+[00:40:54] data sets is is very hard. So we often
+[00:40:56] use intuitions for setting
+[00:40:58] hyperparameters and the single
+[00:41:01] validation set is some sometimes the the
+[00:41:04] approach we go with. But this is pretty
+[00:41:07] much uh advised
+[00:41:09] again outside computer vision outside
+[00:41:11] larger scale data sets. Often research
+[00:41:15] papers require doing these types of
+[00:41:17] cross validation and um
+[00:41:21] and and these types of uh statistical
+[00:41:24] frameworks to make sure your results are
+[00:41:27] uh reproducible on a testing set.
+[00:41:29] Anyways, so there are different
+[00:41:31] approaches. Let's um finalize the topic,
+[00:41:36] wrap up the topic of um
+[00:41:39] nearest neighbor and um look at the some
+[00:41:43] examples, some results.
+[00:41:45] So, let me introduce you to the CR10
+[00:41:50] data set. It's one of the data sets that
+[00:41:51] you're going to be using in your
+[00:41:53] assignments um quite often. It has 10
+[00:41:57] classes with a number of training um
+[00:42:00] images and testing images. The 10
+[00:42:02] classes, some of the examples are shown
+[00:42:04] here with nearest neighbor. For each of
+[00:42:08] the testing images, if we run
+[00:42:13] nearest neighbor and select the top 10
+[00:42:16] nearest neighbors, they are all
+[00:42:19] um visualized there.
+[00:42:23] As you can imagine and guess, one of the
+[00:42:26] first questions to answer is how many
+[00:42:31] what should be the value for K? How many
+[00:42:33] nearest neighbors should we take? And
+[00:42:36] one study, one of the
+[00:42:39] quick experiments with five-fold each of
+[00:42:41] those points is uh is one of the folds
+[00:42:44] in fivefold for each of the values of K
+[00:42:48] shows
+[00:42:50] different values here. And as you can
+[00:42:53] probably see here, K equal to 7
+[00:42:58] generates the best results in terms of
+[00:43:00] accuracy, which is close to 29 28%
+[00:43:06] accuracy,
+[00:43:09] which is actually not too bad because
+[00:43:12] this is a 10 classification problem. And
+[00:43:14] with a 10 classification problem, often
+[00:43:17] the random guess gets you a 10%
+[00:43:20] accuracy. So this is much better than
+[00:43:24] random guess. So it's working. It's
+[00:43:25] doing something but there's a lot of
+[00:43:28] room to improve. So if we go back and
+[00:43:33] look at the examples, we can actually
+[00:43:36] see there are so many mistakes,
+[00:43:38] especially with the with the one that is
+[00:43:40] closest. For example, the fourth row, if
+[00:43:42] you look at that, it's a it's a frog,
+[00:43:44] but the first example seems to be a cat.
+[00:43:47] Sorry, a dog. And um you can guess why
+[00:43:51] this is happening because the distance
+[00:43:54] is being applied on pixels
+[00:43:58] and pixel wise they look like each
+[00:44:01] other. They have the same type of colors
+[00:44:04] in most pixels. So they are much closer.
+[00:44:08] This this example and many other
+[00:44:09] examples show that distances that work
+[00:44:12] on pixels and pixel values are not the
+[00:44:16] best choices. we never we never practice
+[00:44:18] them. There are much better approaches
+[00:44:21] that we'll discussing
+[00:44:23] um at the end of more um in the in the
+[00:44:28] future lectures. And just to wrap up the
+[00:44:32] topic, this is another example. If you
+[00:44:34] look at this original image, those three
+[00:44:37] images while they look very much
+[00:44:39] different in terms of color or maybe uh
+[00:44:42] occlusion or the one in the uh the the
+[00:44:46] third one from uh from the left side is
+[00:44:49] just same pixel. It's the same image
+[00:44:52] with one pixel shifting to the right. I
+[00:44:55] think although from a human eyes
+[00:44:58] perspective there's no absolutely no
+[00:45:00] difference but the this the distance
+[00:45:03] between that and the original image is
+[00:45:05] the same as the other two examples that
+[00:45:07] you see here. I'll um stop for a couple
+[00:45:10] of questions and this is the summary of
+[00:45:12] what we've discussed. So the question is
+[00:45:14] what how we make a decision right that's
+[00:45:16] in those cases you often go with random
+[00:45:19] uh randomly selected one of the tops. So
+[00:45:22] if you are to collect more data,
+[00:45:26] if you're uh for example, you're solving
+[00:45:28] a problem now in genetics or you're
+[00:45:31] solving a problem in medical imaging,
+[00:45:33] when you visualize your um examples,
+[00:45:38] your features or whatever. And then in
+[00:45:41] this nearest neighbor space, you do see
+[00:45:44] pockets of space that you don't have any
+[00:45:46] any good samples for or there is
+[00:45:50] ambiguity,
+[00:45:51] then you often try to go and find other
+[00:45:54] samples that lie in that same area in
+[00:45:57] that space. Okay. Um so summarizing what
+[00:46:02] we've uh talked about with K nearest
+[00:46:05] neighbor it was mostly about
+[00:46:09] um
+[00:46:11] understanding the easiest algorithm
+[00:46:13] datadriven approach and then um talking
+[00:46:17] a little bit about hyperparameter tuning
+[00:46:19] and and how distance metrics and the
+[00:46:22] value of K play a very important role.
+[00:46:26] Moving on to the next topic which is
+[00:46:29] linear classifiers. 20 five minutes uh
+[00:46:32] time to cover this. I want to
+[00:46:37] spend the remaining time of this lecture
+[00:46:40] to to talk about this very important
+[00:46:43] topic. This is the most important
+[00:46:46] building block for almost
+[00:46:51] all of deep learning.
+[00:46:54] and um
+[00:46:57] and we need to um see
+[00:47:01] how this this approach is different. So
+[00:47:04] first we want to see how it's different
+[00:47:06] from nearest neighbor. So this is a
+[00:47:08] parametric approach meaning that now we
+[00:47:11] are learning we are we are finding some
+[00:47:14] parameters W or some weights that map
+[00:47:18] the input image into the output classes
+[00:47:22] the output numbers. In this case, when
+[00:47:25] we create this function f that that maps
+[00:47:28] input to the output, often those outputs
+[00:47:31] are kind of membership scores
+[00:47:35] of the image to each of those 10 uh
+[00:47:40] output classes labels. So with this
+[00:47:43] setup that we we build, a linear
+[00:47:47] classifier
+[00:47:49] first maps uh uses uses w uses these
+[00:47:53] parameters to map each of the inputs x
+[00:47:57] into a value which is the output y. And
+[00:48:01] how this is done is very simple. This
+[00:48:05] image is basically an area of say 32x
+[00:48:08] 32x3.
+[00:48:10] So
+[00:48:12] 372 numbers and this defines
+[00:48:17] our X which is 372 by one vector and we
+[00:48:23] know that we have 10 output classes. So
+[00:48:26] we need 10 different scores and the
+[00:48:28] scores are the the output will be kind
+[00:48:31] of a vector of 10 by one and this means
+[00:48:35] that we have to identify to find a
+[00:48:37] weight matrix W that is a 10 by 372
+[00:48:43] that maps X into the output scores.
+[00:48:47] just to complete this linear function.
+[00:48:50] We often use this bias um
+[00:48:54] term as well. It's an input independent
+[00:48:58] um value which actually has a lot of
+[00:49:02] different use cases. I I can talk about
+[00:49:04] it uh when I do some geometric
+[00:49:06] visualizations, but it it sometimes
+[00:49:09] creates a shift for different um class
+[00:49:12] class scores and um helps with much
+[00:49:16] better
+[00:49:18] separation of each each class. So as I
+[00:49:21] said, these linear functions are
+[00:49:24] actually building blocks for building
+[00:49:26] neural networks. Each of these linear
+[00:49:29] classifiers, linear uh functions when
+[00:49:33] put together one after the other create
+[00:49:35] these uh large neural networks.
+[00:49:39] Although there are a lot other a lot of
+[00:49:42] other things that that need to be added
+[00:49:44] here but um this is one of the most
+[00:49:46] important components. If we look at some
+[00:49:49] of the
+[00:49:52] popular
+[00:49:54] neural networks, we can see that linear
+[00:49:58] functions are everywhere in the in the
+[00:50:02] architectures.
+[00:50:04] So to better understand what this
+[00:50:06] mapping and this function is doing,
+[00:50:08] let's let's go back to our example of
+[00:50:11] CR10 and our uh training and testing
+[00:50:14] samples and so on and even make it a
+[00:50:17] little bit simpler. Instead of looking
+[00:50:18] at large images of 32x 32, let's look at
+[00:50:22] images of 2x two um an input image that
+[00:50:26] has four pixels. This means that
+[00:50:30] the input image is turned into a vector.
+[00:50:34] As you can see here, we have to find a W
+[00:50:40] and the values of B. So the input image
+[00:50:45] is mapped into some scores as the
+[00:50:48] output. So
+[00:50:51] this is this is how the linear function
+[00:50:54] from an algebraic viewpoint looks like.
+[00:50:58] The output scores here we are
+[00:50:59] considering three classes of cat, dog
+[00:51:02] and and chip. And um as you can see this
+[00:51:09] function maps the image the vector
+[00:51:12] representing the image into those
+[00:51:15] scores.
+[00:51:17] So
+[00:51:18] algebraic viewpoint of linear
+[00:51:20] classification. Now let's look at some
+[00:51:24] visual uh perspectives of this linear
+[00:51:26] classifier.
+[00:51:28] As you can see, we often create these
+[00:51:31] like each of these images as um
+[00:51:36] we talked about for each this image for
+[00:51:39] each of the
+[00:51:41] classes we define some sort of we have a
+[00:51:45] we have a row of this m row in the
+[00:51:47] matrix W right. So this this row is kind
+[00:51:50] of a template for that specific class.
+[00:51:52] If I separate it like this. So this
+[00:51:57] image is multiplied by W and B and W is
+[00:52:01] this is the template from each of the
+[00:52:03] three classes of cat, dog and ship. And
+[00:52:08] after training or building the model on
+[00:52:11] the C4 data set, if I look at the visual
+[00:52:15] uh perspective visual uh a a visual
+[00:52:18] point viewpoint of the linear
+[00:52:20] classifier, if I look at those templates
+[00:52:23] that are learned for each of the 10
+[00:52:25] classes, you can see these these
+[00:52:27] templates. So it's very interesting that
+[00:52:30] in some of these cases for example for
+[00:52:32] the for the example for car you do see a
+[00:52:35] front uh the front of a car templateish
+[00:52:40] and um although this is all done with
+[00:52:43] just one linear classifier.
+[00:52:46] So the visual aspect visual uh viewpoint
+[00:52:48] of the linear classifier and there is
+[00:52:51] another aspect of um geometric
+[00:52:54] viewpoint.
+[00:52:56] What this linear classifier often does
+[00:52:59] is finding those lines if it's in 2D
+[00:53:03] space finding those lines that separates
+[00:53:06] each each class from the others.
+[00:53:09] And as you can see here, red, blue and
+[00:53:11] and green are defined in different
+[00:53:16] classes. And um in higher dimensional
+[00:53:19] space, instead of those lines, it's it's
+[00:53:21] it's these hyperplanes as you can see in
+[00:53:23] this example on the on the left.
+[00:53:27] So
+[00:53:29] you can also see the the use of the the
+[00:53:32] bias term here because if if we didn't
+[00:53:35] have the bias all of these lines should
+[00:53:36] have passed through the origin from the
+[00:53:38] center of that space which doesn't
+[00:53:41] really make sense but with the with the
+[00:53:43] bias we can actually create more
+[00:53:45] reliable
+[00:53:48] functions uh and and uh decision
+[00:53:51] boundaries.
+[00:53:53] So
+[00:53:55] a linear function is very useful. A
+[00:53:57] linear classifier is very useful for
+[00:53:59] many applications as uh we talked about
+[00:54:02] and it's a building block of
+[00:54:06] more complex neural networks but it does
+[00:54:08] have its own challenges because it
+[00:54:11] doesn't it can't classify many instances
+[00:54:15] of separate uh data. For example, in in
+[00:54:19] this case, if class one is the first and
+[00:54:22] third quadrant and the second class is
+[00:54:24] second and the fourth, there's no way to
+[00:54:27] linearly separate these. Another example
+[00:54:28] is
+[00:54:30] um if if we have this type of separation
+[00:54:34] between class one and class two that uh
+[00:54:38] shows the distance from the origin being
+[00:54:40] between one and two as class one and
+[00:54:42] then everything else is class two.
+[00:54:44] Similarly, if there is there are three
+[00:54:46] modes, three areas in the space that are
+[00:54:49] one class and then the second class is
+[00:54:51] everything else. So, in in all of these
+[00:54:53] cases, it's actually very hard to to do
+[00:54:55] the separation.
+[00:54:58] So
+[00:55:01] what we um should do so we talked about
+[00:55:05] the linear classifiers and and how they
+[00:55:08] uh they can actually map the input
+[00:55:10] images into any form of labels in the
+[00:55:13] outputs. But
+[00:55:16] now what remains is how to choose the
+[00:55:18] value W that for each of these images
+[00:55:21] maps the image into a score for each
+[00:55:24] single class as the output.
+[00:55:27] And in order to do that, we need to
+[00:55:29] define a loss function, sometimes
+[00:55:32] referred to as objective function that
+[00:55:36] quantifies how bad the classifier, how
+[00:55:39] bad the model is is working. So the
+[00:55:43] level of unhappiness with uh respect to
+[00:55:46] the score on the training data.
+[00:55:49] After defining those, we need to find a
+[00:55:52] way to efficiently change the values of
+[00:55:55] W to be able to op uh to to to minimize
+[00:56:00] that unhappiness basically minimize the
+[00:56:04] loss function. And this is the this is
+[00:56:06] the optimization
+[00:56:08] process. So the topic of next class,
+[00:56:11] next next lecture. And
+[00:56:15] in order to do that again for simplicity
+[00:56:18] let's let's look at a easier and easier
+[00:56:22] example having these three classes a
+[00:56:24] linear function as you can see here and
+[00:56:29] the
+[00:56:31] three classes of cat car and frog. We
+[00:56:35] need a loss function that tells how good
+[00:56:38] our current classifier is. And in order
+[00:56:40] to do that we need to parameterize the
+[00:56:43] problem X I and Y I defining the input
+[00:56:49] image label images and the corresponding
+[00:56:52] labels. And then we need a loss function
+[00:56:56] in distance function that
+[00:56:58] maps uh looks at the the differences and
+[00:57:02] how bad the scores are compared to the
+[00:57:05] ones that are predicted. this the
+[00:57:07] predicted scores fx and w and the ground
+[00:57:11] truth values the values that are already
+[00:57:13] given y i's we often uh normalize them
+[00:57:17] based on the number of samples as well
+[00:57:19] but uh it's not that important so this
+[00:57:21] defines the loss function the objective
+[00:57:23] function
+[00:57:26] so
+[00:57:29] how we can do the um optimization and
+[00:57:32] and how can we uh
+[00:57:37] really find the the W's. There are
+[00:57:41] different ways of defining this L
+[00:57:44] li LI and I want to talk about softmax
+[00:57:47] classifier.
+[00:57:48] Uh right now
+[00:57:51] as an example
+[00:57:56] for that cat if you remember the scores
+[00:57:58] that were given were um 3.2 5.1 and a
+[00:58:02] minus 1.7. These are um the the scores
+[00:58:08] that are the output of the function. We
+[00:58:10] decid we discussed fxi and w. And
+[00:58:16] in order to turn these scores because
+[00:58:18] these scores are unbounded and the
+[00:58:20] values are often not very much uh
+[00:58:23] controllable
+[00:58:24] because this is just a linear function,
+[00:58:26] right? In order to turn these into some
+[00:58:31] scoring functions,
+[00:58:33] the best the possible best possible way
+[00:58:36] is to turn these into probabilities
+[00:58:38] which defines the probability
+[00:58:41] of the class being this class K for each
+[00:58:46] inputs image XI. Right? And in order to
+[00:58:50] do that, we first
+[00:58:53] this is the the function that we we use
+[00:58:56] the soft max function. We first
+[00:58:59] exponentiate the values of the scores to
+[00:59:04] create these numbers. When we use exp on
+[00:59:07] these numbers, the the numbers will
+[00:59:09] always be the outputs will always be
+[00:59:11] positive, right? And we need to make
+[00:59:14] sure that the probabilities are always
+[00:59:15] positive. And after creating these
+[00:59:18] numbers, what we can do is just
+[00:59:20] normalize them.
+[00:59:22] So exponentiate and then normalize based
+[00:59:24] on sum of all of the samples. Right? So
+[00:59:27] then we normalize them based on sum of
+[00:59:31] all samples and this creates
+[00:59:35] very um very good set of values that
+[00:59:39] define a probability function. So this
+[00:59:41] is a distribution function. they sum to
+[00:59:43] one. And
+[00:59:46] if I want to interpret this, it's very
+[00:59:49] simple to say it's this this set of W's
+[00:59:54] parameters
+[00:59:56] thinks that this image is a cat with a
+[01:00:01] probability of 13%. Or 13, right? And um
+[01:00:07] obviously this is this is making making
+[01:00:10] a mistake in this example because the W
+[01:00:12] is not a good setting. We should um
+[01:00:15] optimize it and change it. So these
+[01:00:19] probabilities are the counterparts of
+[01:00:21] these unnormalized
+[01:00:23] uh log probabilities which are often
+[01:00:26] referred to as logits. So
+[01:00:30] if you've uh taken other machine
+[01:00:32] learning courses or if you I'm sure in
+[01:00:35] other fields you've used uh logistic
+[01:00:38] regression. This is a similar type of
+[01:00:41] framework. This is the exact same
+[01:00:42] framework as logistic regression
+[01:00:46] and since we have multiple classes here
+[01:00:49] it's a multinnomial logistic regression.
+[01:00:54] How do we define the function L? I told
+[01:00:58] you that there are different ways of
+[01:00:59] defining the function L.
+[01:01:02] We want to define a loss function that
+[01:01:05] what's the objective here? We want to
+[01:01:08] maximize
+[01:01:10] the probability of
+[01:01:13] the sample belonging to the correct
+[01:01:15] class. Right? So we want to maximize the
+[01:01:19] value of3.
+[01:01:22] Now we have other larger values in in
+[01:01:25] that um
+[01:01:27] set. So
+[01:01:30] if you want to maximize this this is a
+[01:01:32] maximization problem right in order to
+[01:01:35] turn it because all of the objectives
+[01:01:38] that we define we try to build the
+[01:01:41] minimization objective function. The
+[01:01:44] first step is just to
+[01:01:46] uh to negate the values right we negate
+[01:01:50] it. So the maximization problem turns
+[01:01:52] into a minimization problem. And then we
+[01:01:54] also take the log of the value just to
+[01:01:57] uh make the numbers a little bit more
+[01:01:59] manageable. So negative log of that
+[01:02:02] value will define the objective function
+[01:02:05] the the loss function for solving this
+[01:02:09] problem. Very simple. That's that's the
+[01:02:11] objective or the loss function for um
+[01:02:15] softmax and um for for this logistic
+[01:02:20] regression function and if you've taken
+[01:02:23] as I said other other classes like CS2
+[01:02:26] 229
+[01:02:28] um it's often referred to as maximum
+[01:02:30] likelihood estimation as well it's the
+[01:02:32] same algorithm
+[01:02:34] so with that in mind I want to say that
+[01:02:40] So as as as we discussed it's the
+[01:02:43] negative of the log of that probability
+[01:02:45] of the correct class
+[01:02:47] which defines the objective function the
+[01:02:49] loss function
+[01:02:54] and that's basically that simple but
+[01:02:56] there are other types of interpreting
+[01:02:58] this this framework as well. So
+[01:03:02] one way of um
+[01:03:06] redefining this loss function is saying
+[01:03:09] that we have some estimated
+[01:03:11] probabilities and we also have a
+[01:03:14] probability function that that defines
+[01:03:15] the correct probabilities. What we want
+[01:03:18] to do is to match these two probability
+[01:03:22] functions. Right? And in order to to do
+[01:03:26] that we want to minimize the KL
+[01:03:29] divergence call back laborer divergence.
+[01:03:32] This is a information theoretic u
+[01:03:36] perspective of looking at this uh loss
+[01:03:38] function. And again
+[01:03:42] those are exactly the same. this um KL
+[01:03:45] divergence in this setting
+[01:03:49] simplifies into the same negative log
+[01:03:52] function that we defined. And even going
+[01:03:55] further, this is
+[01:03:59] um exactly the cross entropy function
+[01:04:02] because if if we define this um use this
+[01:04:06] entropy of P
+[01:04:10] which is um uh entropy of the correct
+[01:04:14] values, correct probabilities plus the
+[01:04:17] same KL divergence. Again, this
+[01:04:19] simplifies into the same negative log
+[01:04:21] function. And that's because when we use
+[01:04:24] one hot encoding setting for the classes
+[01:04:28] the entropy is zero. So that's one of
+[01:04:31] the reasons that we call this function
+[01:04:33] cross entropy or binary cross entropy
+[01:04:35] function in in all of deep learning
+[01:04:37] you've probably
+[01:04:40] if you've used any of the neural network
+[01:04:42] frameworks you've heard about BCE binary
+[01:04:44] cross entropy or you will be hearing
+[01:04:46] about it a lot. So this is the same uh
+[01:04:50] framework. We start very simple but we
+[01:04:52] got to the
+[01:04:54] to the
+[01:04:56] uh similarities and differences between
+[01:04:58] each of those. So the objective the
+[01:05:02] sorry the loss function was defined as
+[01:05:04] negative log of this probability and the
+[01:05:06] probability was was defined by the
+[01:05:08] softmax which we talked about and and
+[01:05:12] then optimizing for this which is the
+[01:05:14] topic of next session will give us the
+[01:05:17] right W's. But before I end I want to
+[01:05:22] ask a couple of questions with this
+[01:05:24] definition that you see here. What is
+[01:05:26] the mean and maximum
+[01:05:29] value that you can see for the loss
+[01:05:31] function li?
+[01:05:33] Yes, it's zero which we which turns into
+[01:05:35] minus minus infinity but we have a a
+[01:05:38] negative negation there. So it would be
+[01:05:40] infinity that is correct. But then we
+[01:05:43] also have to uh
+[01:05:47] yes that that's that's definitely um
+[01:05:51] that's right. And um let me actually
+[01:05:55] look at a second question. Yes, this
+[01:05:57] one.
+[01:06:00] So when we initialize all of the SI, so
+[01:06:04] basically the W's in the beginning, it's
+[01:06:06] almost random. So the probabilities of
+[01:06:10] each of the classes becomes mostly
+[01:06:15] um
+[01:06:17] equal. What is the softmax LI? assuming
+[01:06:21] we have C classes
+[01:06:30] and especially if it's C 10.
+[01:06:34] So because the probabilities are equal
+[01:06:37] it means that all of the probabilities
+[01:06:39] are around 1 / C right and then that
+[01:06:43] will uh be defined as log of C and we
+[01:06:47] have 10 if we have 10 classes then the
+[01:06:49] log or ln of 10 is 2.3 which is the um x
+[01:06:54] we know we know about
