@@ -1,0 +1,1472 @@
+ As you can see on this slide, today
+ we're going to talk about neural
+ networks and back
+ propagation which is actually the
+ process
+ early years I was I was studying this. I
+ was often referring to it as the magical
+ process that um lets the neural networks
+ learn from their own mistakes
+ pretty much like humans but in a more
+ organized fashion and also uh using a
+ little bit more math. So let's let's
+ dive into the topic. I'm I'm sure this
+ is going to be uh exciting and this is a
+ found is is laying a foundation for the
+ rest of the quarter. Every single
+ algorithm that we'll be discussing in
+ the future without even mentioning is is
+ using a form of back propagation and um
+ so that's why understanding this this
+ lecture and the topics are
+ uh is is very important. Okay. in
+ keeping us with the uh tradition. Let's
+ cover what we've talked about so far.
+ So,
+ I'm sure you now remember uh what we
+ talked about last time.
+ We we said how we can form the
+ objective functions or loss functions
+ what we call here and then um we talked
+ about regularization.
+ But to do that
+ uh we formulated everything through the
+ XY
+ uh defining the pairs and and scoring
+ function which in this case we are using
+ a linear scoring function as you can see
+ and also
+ uh defining ultimately this this loss
+ function. So this graph that you see on
+ the right is what we
+ uh we drew showing all the process the
+ entire process of learning. There has
+ been some questions um
+ the questions last
+ last le in the last lecture and also
+ even before that that why we only using
+ the soft max function. I wanted to uh
+ reiterate that it's not the only loss
+ function that we have and we use it's
+ it's um it's one of the most widely used
+ in deep learning and and building
+ especially for the task of
+ classification but there are so many
+ other options that we use for for other
+ task for different tasks even for the
+ task of classification
+ if you've looked at the slides that
+ we've shared on the website I I included
+ this hinge loss loss or um used to be
+ called SVM loss in the reading
+ assignments on le in lecture two. So in
+ the slides we had uh examples and and
+ everything around
+ the topic of
+ um hinge loss. It is also one of those
+ widely used um loss functions especially
+ in the early years of uh neural
+ networks. And um just to give you a high
+ level understanding of what it is uh
+ this is a loss
+ function that unlike soft max does not
+ turn the scores into probabilities. So
+ turning them into probabilities is not
+ is not the only option. Right? So we can
+ uh use other forms. This this function
+ encourages the score of uh let me
+ highlight here the score um
+ of the correct items uh which is defined
+ by s yi to be higher than the scores of
+ all other items sj. You can see the the
+ condition here creating a
+ value of zero.
+ if the condition is is true and
+ otherwise
+ what it does is um so as as I said it it
+ encourages the score of the the correct
+ item uh to be higher than the scores of
+ all other items um by at least a margin
+ that number one that you see there is
+ the margin that it creates and then if
+ the condition is violated the loss
+ increases proportionally
+ um from the margin and this is the
+ visualization. So creating the
+ uh this um
+ visualization of of the function. So
+ this promotes correct scores by
+ penalizing cases where irrelevant items
+ are scored too highly. So again refer to
+ assignment reading assignment in lecture
+ two for examples and uh and to get
+ better understanding of that. Next we
+ have talked about uh general
+ optimization how to find the the best
+ parameters w for
+ for uh the neural network. And in doing
+ so, we talked a little bit about this
+ lost landscape
+ uh being as a large valley um as as as
+ shown in this um image. And every point
+ on that valley is a different set of
+ weight parameters
+ and we wanted to find the set of
+ parameters W that minimizes that loss
+ landscape.
+ We talked about the fact that the key is
+ is being able to take the gradient of
+ the loss function L with respect to W
+ and use the gradient for optimization in
+ a stepbystep
+ manner which gave us the gradient
+ descent algorithm. Right? So the weights
+ are basically updated. Although it's
+ very hard for me to see from from this
+ distance what I'm pointing to, but I
+ guess I
+ uh I can guess. So um anyways,
+ in order to walk down the loss landscape
+ towards the minimum value, a step size
+ is defined. and we often uh get
+ take one step
+ with respect to a step step size in the
+ negative direction of the uh gradient.
+ So this was the gradient descent
+ algorithm and in order to optimize we
+ talked about uh two different approaches
+ of numerical gradient and analytical
+ gradient both of which having pros and
+ cons and we discussed in practice to
+ drive analytical gradients.
+ In practice, we drive analytical
+ gradients and often if it's if it's hard
+ to do the implementation and the math
+ and everything, we check our
+ implementations with neural numerical
+ gradients.
+ And one of the other challenges we
+ talked about was the use of um um
+ incorporating the loss function and its
+ gradient on the entire data set. So if
+ you have a large data set, it's it's
+ very expensive to
+ um to run the loss function and the the
+ der derivative on the entire data set.
+ And that's why we talked about the idea
+ of mini batches using a number of
+ examples sampled from the data set often
+ 32 um
+ often maybe uh 3264
+ uh 128 or 256.
+ And that subsampled
+ data is used for
+ identifying the gradients and then
+ taking the steps towards the
+ the minimal.
+ And beyond SGD and a stochastic um
+ gradient descent, we talked about some
+ optimizations of SD SGD with momentum
+ um RMS prom uh prop and and atom
+ optimizer.
+ And um there were a lot of details that
+ I would refer you to the lecture
+ um the third lecture if you have um any
+ specific
+ uh questions about those. So
+ and then one of the other things that we
+ talked about was the importance of the
+ learning rate and and scheduling the
+ learning rate. And in some of the
+ optimizers we often try to start with a
+ larger value of the learning rate and
+ then start using different types of um
+ decaying the learning rate or or
+ reducing its its value by a factor. Um
+ this is normally uh needed in many
+ uh optimizers but but in in some of the
+ more recent ones uh atom and it's its
+ variance we often do not need to uh
+ manually or explicitly decrease that
+ because they that that is kind of
+ encoded into the optimizer itself.
+ So with that I uh want us to get uh to
+ the topic of neural networks
+ and and see how we can actually build um
+ neural networks and and solve more
+ exciting and and harder problems.
+ So uh
+ we've so far talked about this this
+ function linear function of w multiplied
+ by x and that is um is is the most basic
+ neural network that could be defined.
+ It's just one u layer. We will be
+ talking about the layers.
+ And um what I want you to pay attention
+ to here is are these dimensions D and C
+ which are the dimensionality of the
+ input um data input X or or the uh
+ number of features and C is the number
+ of classes basically the number of
+ output uh nodes or or neurons whatever
+ number of outputs we need.
+ And um in order to create a neural
+ network at a second layer, we can define
+ a new set of weights uh referred to as
+ W2 here. And we apply those to the the
+ previous layer of W1 uh multiplied by X.
+ Again pay attention to the
+ dimensionalities here that we have the C
+ number of outputs and D as the number of
+ uh input features. But then we also
+ define H and and uh that defines
+ uh the number of neurons the number of
+ hidden layer nodes or neurons.
+ That's one point. The second point is
+ this max function that um we'll be
+ coming back to and we'll explain what it
+ it is and what it means. What um the max
+ operation is doing here is to create a
+ nonlinearity between the linear
+ transformations done by W1 and W2. And
+ this is actually a very very important
+ um
+ part of um the the process. I will talk
+ a little bit about the nonlinearity but
+ also uh look at this this last part
+ before I forget in practice that's right
+ that we are only including w and x we we
+ as we talked about this in the first and
+ second lecture we also
+ uh incorporate a bias just to have a a
+ complete framework so so in practice we
+ also have bias but we don't write it
+ here for the sake of simplicity anyways
+ the max operation is creating the
+ nonlinearity and it's actually very
+ important because as we talked about um
+ the
+ linear classifiers last in the last few
+ lectures we we said we mentioned that
+ there are so many different problems
+ that we can't uh separate the samples
+ with just one single line right this was
+ one of the examples that um in order to
+ be able to solve this problem with
+ neural networks with linear functions.
+ we need some sort of nonlinear
+ transformation from the original space
+ to a new space and now in the new space
+ you see that it's they are separable
+ using a a line right so with um in this
+ case it's it's a nonlinear u
+ transformation between the input and
+ then the second space which is mapping
+ the x and y to their polar polar
+ coordinates r and theta but again Um
+ this is just one example. There are so
+ many other um examples too.
+ So um with
+ this example, let's go back to oops uh
+ let's go back to our uh definition of
+ the two layer neural network.
+ As you've probably seen in the
+ literature and outside uh this class,
+ these types of networks which only
+ depend on weights and u inputs and
+ layers and so on. There are no other
+ operations than multiplication are often
+ referred to as fully connected networks
+ or multilayer perceptrons MLPS. So
+ that's that's one um thing and we can
+ actually stack more and more layers to
+ create better um more um larger networks
+ and in this case again uh pay attention
+ to the dimensionalities and the hidden
+ layers that we have in u in in in the
+ middle and the dimensionalities that do
+ uh match one after the other. So um
+ back to this visual representation of
+ what the neural network is doing. Um
+ we talked about this when when we had
+ the linear representations that often
+ what happens is the network through the
+ weights is learning some sort of
+ templates.
+ If you remember last uh last week we
+ were talking about these templates that
+ are being learned. So again I'm saying
+ templates they're they're not I mean
+ they are some representatives of the
+ images but from the data
+ uh depending on what data it was trained
+ on. So these templates in in um what we
+ discussed last week were kind of
+ generated by by these um 10 outputs by
+ applying the W's on top of the input
+ neurons right so um with that
+ now that we have multiple layers more
+ layers now we can actually create some
+ more templates now now we have a layer
+ in the middle that can actually create
+ 100 templates lets um as opposed to just
+ just 10 for a linear classifier although
+ we still have those 10 as well and this
+ again uh in a very high from a very high
+ level understanding point of view I'm
+ I'm telling you what this means when um
+ we have these 100 neurons in the in the
+ middle we are giving the network the
+ power to create templates for not entire
+ objects but maybe parts of the object
+ for example the classes that you see
+ here We had bird, cat, um, deer, dog,
+ frog, horse, they all have eyes, right?
+ So one of those 10 templates, 100
+ templates could probably be a part of
+ the objects that is that could be shared
+ between all of the classes. So from a
+ high level point of view and
+ understanding this um these can form
+ templates and when we come back to the
+ topics of visualization and what we
+ learn from the neural networks this uh
+ this topic will we'll uncover more
+ details about what I I'm talking about
+ right now. So um
+ back to the function max we talked about
+ max uh function the nonlinearity that is
+ created here and in neural network
+ terminology we call that an activation
+ function right it and it's actually
+ playing a very very important role a
+ pivotal role in in building the model uh
+ building a neural network let's answer
+ this question that we have on the slide
+ what happens if we try to build a neural
+ network without uh one of these
+ activation functions let's say the the
+ max function this will be our function
+ if I remove the the max right so it
+ would be w2 * w1 by x what would happen
+ here yes exactly so as u you can guess
+ and and correctly you mentioned the
+ multiplication of w2 by w1 could
+ actually be replaced easily with another
+ matrix W3 and then your function becomes
+ just a linear function. So everything
+ could be lumped uh together. So we need
+ some sort of nonlinearity in the middle
+ to be able to give us the uh the power
+ to solve nonlinear
+ uh problems. The function that we just
+ talked uh about is uh ReLU. It's the
+ rectified linear unit. It's a very
+ popular function activation function
+ used in neural networks while there are
+ so many other variants that have have
+ been tested in many uh many other
+ architectures and and even in the more
+ modern architectures. One of the
+ problems that ReLU has it it sometimes
+ creates dead neurons because it it's
+ it's it's making everything equal to
+ zero if it's uh not positive. Right? So
+ in order to avoid the dead uh neurons
+ leaky relu with this uh type of modeling
+ or uh elu the exponential linear unit
+ are other options. ELU is a little bit
+ better because it has a better zero
+ centered uh function and then there are
+ some newer variations
+ um jello uh gshian error uh linear units
+ or I don't know I've I've heard both
+ variation jello and yellow so um could
+ be could be used they are often used
+ more often in neuro architecture in in
+ transformers and Um we also have
+ silo
+ or or swish. Uh it's the sigmoid linear
+ unit that um uh that one is is also used
+ in some of the modern CNN architectures.
+ Google was using this for uh efficient
+ some of the variations of their uh
+ models and also in efficient net.
+ Other than these there are um functions
+ like simmoid and uh ten or or tanh that
+ are often also used for
+ as as activation functions although they
+ do have a few problems
+ because they do squash values in a
+ narrow range and that uh sometimes
+ results in vanishing vanishing
+ gradients. So we often do not use
+ sigmoid or or tang in the middle of the
+ neural networks. They are often used in
+ the later layers where um we want to for
+ example binarize the outputs and and uh
+ things like that. So as I said ReLU is
+ often a good default choice. It's it's
+ very much used in many
+ architectures and there are so many
+ variations of the same function that we
+ talked uh about.
+ I want to summarize what what we've
+ talked about and then answer some
+ questions. So um we did talk about
+ different uh adding layers and and so
+ on. But I want to highlight that
+ activation functions are often functions
+ that are operating in the
+ layers. And you also have W's which
+ define the weights mapping between the
+ previous layer and the and the next
+ layer. Again, these are fully connected
+ neural networks with very simple
+ uh implementations.
+ What we only need is to be able to
+ define an activation function. And in
+ this example, if you look at the
+ example, we have um the sigmoid uh
+ function defined as the activation
+ function. And very easily using that
+ activation. The first and the second
+ layers of the hidden values, hidden
+ neurons are
+ uh calculated by applying w1 by x and
+ then also the uh the bias and then
+ applying it um applying the function the
+ the activation function and then same
+ for h2 and the output will be very
+ simply the the dot product for the uh
+ between the with w3 and the last layer
+ of hidden values creating the output
+ layer. I'll stop here to answer some
+ questions if there are any and then I
+ would love to continue it. That is a
+ great question and the question is how
+ would we choose for a new problem which
+ of these activation functions to use? Um
+ the short answer to your question is uh
+ is yes. It's it's empir empirical in
+ most cases. Um but we often start with
+ with Reu or we go with um standard
+ activation functions being used for
+ those specific architectures. Uh as I
+ mentioned there are um activation
+ functions that are often commonly used
+ in um CNN's or in transformers and and
+ uh different architectures. So we often
+ uh go with the with the ones that are
+ tested before. But yes, it's it's mostly
+ empirical. If you're if you're designing
+ a new network for a new problem, then uh
+ that's one of your choices that you have
+ to make very much similar to other
+ hyperparameters.
+ So the question here uh is is uh what is
+ the attribute that is is is basically
+ common between all of these activation
+ functions and uh what it it really does.
+ I will uh give you some examples and
+ I'll I'll go into some of the details of
+ what these activation functions are
+ doing. Uh basically the uh main and and
+ the most important common characteristic
+ here is to create nonlinearity and we're
+ not using a linear function as as the
+ activation. Right? So creating some sort
+ of nonlinearity is is something that is
+ makes makes it very important. And why
+ do we have so many variations? I told
+ you a little bit about the problems with
+ v vanishing gradients. I told you uh a
+ little bit about
+ uh differentiability of the the
+ functions. They should be uh
+ differentiable because we are using them
+ in neural network. and uh and and uh
+ sometimes having a a proper zero
+ centered value and a smooth function
+ makes it uh much faster to to get
+ converging networks. So there are so
+ many different uh factors these are the
+ the main ones that I uh told you and
+ talked about which play an important
+ role for defining or designing these uh
+ functions.
+ I'll talk a little bit more about that
+ when I uh go into details of the
+ functions too. In all of the layers we
+ often use um same activation functions
+ but as I said sometimes in the later
+ layers or the output layer we use like a
+ sigmoid activation sigmoid uh function
+ and or tangent function. So um but but
+ commonly yes and uh
+ the question was if we use the same uh
+ across the networks
+ uh the the entire network same function
+ for all of the neurons.
+ Okay. Um continuing uh to
+ what we were talking about which um is
+ the implementation of these um
+ models these um a neural network. So
+ there is a very simple way um I mean
+ that building a neural network a two
+ layer neuron network in Python is just
+ less than or or 20 lines of code very
+ simple define our network as I talked
+ about the dimensionalities n is the
+ number of samples dn d in is the
+ dimensionality of the input and d out is
+ the dimension of the out the output and
+ h the number of neurons in the
+ uh hidden layer and we talked about this
+ is just creating X and Y and randomize u
+ randomly init uh initializing W's. Then
+ we have the forward forward pass which
+ means applying W's to the inputs
+ layer by layer and ultimately creating
+ the output the prediction wise predicted
+ wise and then al and and and finally
+ calculating the loss function and
+ outputting that loss value
+ after the forward As we need an
+ optimization pro process, a way to
+ calculate the analytical gradients and
+ use those gradients that are created to
+ run gradient descent to optimize W1 and
+ W2. Basically taking one step towards
+ the optimal value of the network.
+ But this part calculating the analytical
+ gradient is is the most important um
+ part in in here that we haven't very
+ much uh gone into. So this is the the
+ almost the rest of this lecture is about
+ making this work and scale in um
+ different settings. So um
+ after training and building such a
+ neural network depending on on how many
+ nodes we use in the hidden layer you see
+ that we can we can identify we can get
+ different patterns uh of separation
+ between the two classes and more neurons
+ often means more capacity to learn more
+ complex functions and better separation.
+ of the
+ uh the nodes the the
+ points
+ if you take a look at this this is this
+ is very much similar to this this
+ pattern I'm showing here is is similar
+ to the one that I showed in the second
+ lecture where we were talking about k
+ nearest neighbor and and when we had
+ only k equal to one the the one nearest
+ neighbor framework
+ it was very much similar to using more
+ neurons right so same type of arguments
+ happen here that that if we give a lot
+ of capacity to the network then we will
+ have some overfeeding problems uh we
+ won't be able to generalize to unseen
+ data but uh there are many different
+ solutions for
+ this as well and one thing that I as a
+ rule of thumb what I want to highlight
+ here for you is to not use the size of
+ neural network as a regularizer. We
+ don't often use that as a hyperparameter
+ to fine-tune this this network size
+ although we experiment with different um
+ values of uh the network size and um
+ related hyperparameters. But what we
+ often do is we we go with a a little bit
+ of a um bigger network that we need and
+ then we use the regularization
+ um and then this regularizer and
+ specifically this regular regularization
+ um hyperparameter
+ to to do a different to check the
+ different setups. So what we often tune
+ is the regularization and regularization
+ hyperparameter not necessarily the
+ network size itself.
+ Okay. Um
+ this is the concept of neural networks
+ in a nutshell. But we
+ have heard about neural networks and how
+ they could be related to uh the
+ biological there are some biological
+ inspirations. Uh so I'll I'll talk a
+ little bit about it but there's a
+ question basically your question is uh
+ why is the model
+ more underfeeding when we increase the
+ value of lambda here? Yes. So um just to
+ quickly answer that question, the value
+ of lambda is controlling how much
+ contribution the regularizer should have
+ in the overall loss, right? And the
+ larger contribution that you have um on
+ the regularizer and remember that
+ regularizer was defined on W's. So it's
+ constraining the W's. It's giving less
+ freedom to the values on W's, right? So
+ less freedom equals a little bit of like
+ u
+ more generic boundaries not not
+ necessarily giving you those uh like
+ detailed values detailed um uh parts of
+ the the boundaries right so if you
+ constrain the model too much even with
+ regularizer you're also going to get uh
+ values like that decision boundaries
+ like that yes the right regularizer
+ always overfeeds uh prevents
+ overfeeding.
+ Again you you are creating a compromise
+ a balance between the loss like
+ predicting the actual the right output.
+ So the first part of the loss is
+ predicting the right output. The second
+ part is only playing with the values of
+ the weights doesn't doesn't care about
+ the outputs anymore. If you overweight
+ this you're not going to get very good
+ uh classifiers right. So creating a
+ balance regularizer is always good but
+ nothing is good if you use too much of
+ it. Right.
+
+ >> Um could you go over again why we would
+ want to change the regularization rather
+ than the size?
+ >> So um there are many different reasons.
+ One of them is size of the network.
+ You're building networks. If you're
+ going to build networks that sometimes
+ that you have to run them for few days
+ to to to get some results, right? So
+ networks um we often what we what we
+ often do is we start increasing the
+ quality the number of parameters in
+ networks until we see some levels of
+ overfeeding.
+ So that's that's the time that we know
+ that the network is is actually
+ understanding the patterns in the data
+ and is trying is is is now able to
+ memorize the data and that's the time
+ that we try to minimize the overfeitting
+ by regularizing the the network. So
+ regularization plays an important factor
+ there. So if we if we go too high on the
+ uh on the number of parameters number of
+ complexity of the network then that's
+ going to be causing a problem. We never
+ never often do that. We often for a new
+ problem start with smaller u networks
+ and and increase that um after with
+ correct that with the regularizer for a
+ given problem.
+ How do we know how many neurons we need
+ to solve the problem? that's based on uh
+ empirical um research work and and
+ looking at other uh similar type of
+ there is no one prescription for all
+ like you have to look at um other
+ counterparts other other types of
+ networks that were trained in sim on
+ similar data. start from that range and
+ then um often you do a number of
+ experiments yourself to balance and
+ increase or decrease the complexity of
+ the network. So it's it's often and
+ always pretty much bound to uh
+ exploration.
+ So your question is are there any
+ theoretical and and foundational work uh
+ done to see um which ones to use, which
+ activation functions to use and how many
+ layers to use. There are so many uh
+ research and and and uh papers out
+ analyzing these and and also some
+ methods for optimizing all of these um
+ meta or hyperparameters of of the
+ networks. We're not going to get into uh
+ them in in detail because again a big
+ part of it is based on very much
+ dependent on the data set the problem
+ you're solving and um so
+ uh the best answer to your question is
+ yes there are some works out there but
+ um but again each of those make
+ assumptions that may not be necessarily
+ true to your uh for your application or
+ problem. So um what what happens is um
+ there are some biological inspirations.
+ Again these inspirations are very much
+ very loose. If there is a neuroscientist
+ sitting here or is watching online um
+ it's uh do not take all of the examples
+ that I'm um giving you or talking about
+ as u
+ the ground truth. But
+ generally what happens in in neurons and
+ you know this this is a a
+ visualization of a neuron. It does have
+ a cell body that often uh aggregates the
+ impulses carried through dendrites to
+ the cell um
+ body itself cell uh body and then using
+ axons those impulses are carried away to
+ other uh neurons. This is very much
+ similar to what we are doing in our
+ neural networks. We often have a
+ function that captures the
+ uh the the the the signals all of the
+ previous impulses activations from the
+ previous layers and in the cell body
+ that function
+ is operated on the um on the inputs and
+ outputs the out the the activations and
+ passes them to the next layer. here next
+ neuron. And that's basically why we need
+ some sort of activation function here to
+ to create the impulses to to to increase
+ or decrease the the values. Um, so with
+ that again, uh, that there are many
+ differences between biological neurons
+ and how they could actually be way more
+ complex than what
+ neural networks we build look like. But
+ um, but generally there are common
+ concepts.
+ Often the neural networks that we build
+ are organized into regular patterns and
+ those patterns are because we want to
+ have better computational efficiency
+ when we be we implement the uh neural
+ networks. Although there has been
+ research creating these complex neural
+ networks and and trying to optimize but
+ um again in terms of results they are
+ almost comparable with the regular
+ functions regular neuron networks that
+ we often build and we'll be talking
+ about in this class.
+ I can't uh warn you enough on on on on
+ being careful with your brain analogies
+ and um and how this could uh be
+ interpreted. So there are so many
+ differences and um I'll I'll just uh
+ stop here and would be happy to discuss
+ if if anybody was interested in the
+ neuroscience aspect of things as well.
+ So um plugging everything in we did have
+ a scoring function.
+ This scoring function
+ turns the inputs through some W's, some
+ weight vectors or weight matrices into
+ scores. And um
+ what we often use as the loss function
+ for the network is using those scores
+ either through hinge loss or soft max or
+ other variations.
+ And uh and and in addition to that we
+ defined regularizers
+ which ultimately give us the total loss
+ of a the data loss plus regularizer.
+ And um we talked about this fact that in
+ order to be able to optimize W1 and W2,
+ what we need is to be able to take the
+ derivative of the partial derivative of
+ L with respect to W1 and W2. Uh partial
+ A by W1 and W2. There are so many
+ different um details that we have to be
+ aware of.
+ First, uh building these functions and
+ then taking the derivatives and and
+ writing them down is often tedious.
+ There are lots of matrix calculations
+ and need a lot of uh work on the paper
+ before you can actually implement a
+ neural network. The other challenge, the
+ other problem is what if you want to
+ change the loss slightly different from
+ what we we've we've done the paper all
+ of the calculations
+ um over. So in that case again we have
+ to um
+ redo the entire thing and finally um
+ this becomes intractable and sometimes
+ invisible if the loss function is
+ complex. So with complex functions
+ that's going to be even
+ harder.
+ But there is a better idea, something
+ that is often used um in our
+ implementations and I'm going to go into
+ a few examples today just to make sure
+ everybody is on the same page and
+ understands these uh topics.
+ So and and that is computational graphs
+ and the idea of back propagation.
+ computational graphs are are
+ putting together all of the operations
+ in the neural network and um creating
+ that stepbystep thing and and and start
+ from the inputs and all of the
+ parameters that are uh basically needed
+ and get the loss as the final um output
+ final layer. So in this case we had a
+ loss function which could be a softmax
+ function or a hinge loss function
+ whatever it is it's the loss function
+ which is added to the regularizer the
+ the function rw
+ and r has the has w as the input. So
+ these two added together calculate or or
+ create the loss and before doing the um
+ or or having the loss calculated we
+ often also need to aggregate X and W and
+ create the score. This is a
+ multiplication function.
+ This is um actually very useful because
+ most of the neural networks that you
+ build are also they have graphical
+ representations and all of these complex
+ functions could be could be shown with
+ the same uh framework and then we can
+ use this and uh and build their
+ computation graph starting from input
+ image or input data. There are a bunch
+ of weights throughout the network. And
+ finally, there is the loss function.
+ And again, this is useful because um
+ there are some complex neural networks
+ like this um neural touring machine and
+ uh that is actually used for temporal
+ and sequential data. So there's a lot of
+ unrolling of this this machine. And if
+ we have to do all of the work manually
+ by hand, this is going to be un um
+ intractable and and not uh feasible. So
+ and that's why
+ when we build this this computational
+ graph, the solution to that is back
+ propagation.
+ And I want to start with a very simple
+ example. So we start with a function um
+ f of x y and z which is x + y * z. And
+ if I draw the computational graph for
+ for this function, you see we have an
+ operation
+ which is uh the the the addition
+ operation between x and y and then we
+ have a multiplication between x uh
+ between the
+ that that addition of x1 and y
+ multiplied by z.
+ So given an input setup of x = -2, y = 5
+ and z = -4.
+ Now actually we can make all of the
+ calculations for and and do this uh the
+ forward
+ pass the uh for stepping forward in the
+ the neural network. The first step is
+ adding x and y which gives us three. And
+ in order to be able to to understand the
+ steps and step by step, I'm I'm giving
+ the name to it. So Q= X + Y. And if I
+ want to calculate the partial
+ derivatives of Q with respect to both X
+ and Y, it's very simple because we have
+ the formulation here between X and um Q
+ and X and Y. The the formulation is
+ there. the derivatives the partial
+ partial q by x = 1 and partial q by y =
+ 1 as well. So so this is this is a
+ simple setup we know it exists so just
+ keep it in the back of our minds. Then u
+ the second operation is f= q *
+ z. Again, since we have this function,
+ it's very easy to calculate to to write
+ the partial derivatives, right?
+ Uh partial f by q= z and f by z equals u
+ q. So, it's kind of swap between z and
+ q.
+ I'm hoping that everybody knows all of
+ these from linear algebra. So, and if
+ you don't, you should definitely check
+ it out and remind yourself because these
+ are actually very very important
+ um algebra in general and uh for the
+ rest of the quarter. what we want and
+ what we need uh in this setup and and to
+ complete this example of back
+ propagation, we need the partial
+ derivative of f with respect to x, y and
+ z.
+ How we start and how back propagation
+ implements this is to start at the front
+ of the network at the end of the network
+ and we start going back back propagating
+ all of the gradients and um this is
+ basically a recursive process that will
+ be u running. So
+ derivative of f with respect to f
+ is what? It's the thing with respect to
+ itself, right? So it's always the the
+ the the last part the derivative of loss
+ function with respect to itself is is
+ always one. If I want to back prop the
+ first the most immediate one is z. You
+ can see here that
+ um we have z and and for this one if I
+ calculate the derivative of f with
+ respect to z we already have it right f
+ with respect to z is equal to q. So
+ whatever the value of q is goes to
+ this um as as the gradient as well. Next
+ we have um q q is the the next one. next
+ one that is directly connected to f. So
+ this is also easy to compute because we
+ have um derivative of f with respect to
+ q. We have also already uh calculated
+ that it's equal to z whatever z is
+ that's the value of derivative here
+ minus 4.
+ Next we have
+ y which is directly before q and we know
+ that y and f although we need derivative
+ of f with respect to y but y and f are
+ not directly connected and that's where
+ we use the chain rule
+ where
+ we split the the
+ uh calculation of derivatives with
+ respect to the variable in in the
+ middle. So partial f by y equals to
+ partial f by q q by y. Right? So this is
+ the
+ this is how the chain rule could be
+ could be written in this case. And now I
+ want to introduce you to two important
+ new terms. Local gradient and upstream
+ gradient. up string gradient is often
+ the gradient that comes from the end of
+ the network to this this um
+ current node that we are in and then uh
+ the local gradient is the gradient of
+ the the the note what the input of the
+ note is with u
+ gradient of of its output with respect
+ to its input. So it's the local
+ gradient. So defining these is actually
+ not too hard because f by q we already
+ have the value q by y we also already
+ have the value. So it's 1 multiplied by
+ z and the value will become minus 4.
+ Same story when it it's the
+ for the other uh variable x here the
+ local gradient upstream could again be
+ written uh down with this chain rule and
+ it also results in minus 4 and and um
+ gives us because because in both cases
+ the
+ gradient with respect to x or y was
+ already one. So both of them get the
+ same value. So with this computational
+ setup and the computational graph, it
+ becomes very easy to modularize what we
+ want to do for every single node in the
+ neural network
+ having X and Y as input or whatever else
+ and Z as the output.
+ What we need
+ are first the local gradients
+ which we can always we have the function
+ f it's a function of x and y. So the
+ output gradient of output with respect
+ to the each of the inputs it's easy to
+ calculate for every single node and what
+ we need to be able to back propagate is
+ the upstream gradient right and the back
+ propagation process is giving us the
+ power to get this upstream gradient step
+ by step. So we when we are at this node
+ we also have the upstream gradient
+ already uh calculated from the future
+ nodes and um
+ that's what we need. What we can do
+ after this is just to multiply the
+ upstream gradient with the local
+ gradient and create what now we call
+ downstream gradients. So the downstream
+ gradients are going to be upstream
+ gradients for the previous layers.
+ Right? So that's how we calculate that
+ for X. Same story when it comes to Y.
+ So this this whole process gives us the
+ the power to create and and calculate
+ all of these completely locally and step
+ by step go backwards and give it to the
+ previous nodes so they can continue the
+ process. So again this is one of the
+ most um fundamental operations in all of
+ neural networks and many optimization
+ uh processes involving multiple layers
+ of uh information.
+ If I understand the question correctly,
+ you're saying how can we understand this
+ intuitively what the gradients are
+ doing, right? So let's take one step
+ back and and see why we why we are here
+ to begin with. What we needed was to
+ identify to calculate the gradient of
+ the loss function with respect to w1 and
+ w2 and w's in general to be able to take
+ a step to uh in the negative u direction
+ of in the opposite direction of the
+ gradients to be able to find the the
+ optimal value right optimal loss. So in
+ order to do that we need gradient of l
+ loss with respect to everything. So what
+ we are doing is we are just moving
+ gradient of L with respect to all
+ variables in the network back to every
+ single value of the network without
+ sitting down and writing the function
+ for the entire network. If the network
+ has um 100 layers, we're not going to be
+ sitting down and writing the function
+ for all of the 100 layers separately.
+ This is how we back propagate step by
+ step to to get the values that we need
+ for that optimization process of every
+ single weight that is going to be
+ incorporated in the network.
+ Okay. Um
+ example uh another example
+ um
+ so this is a little bit more complex
+ function uh function of weights and x
+ and we have 1 / 1 + e ^ of a linear
+ combination of x and um w.
+ So
+ there are a bunch of multiplications,
+ additions,
+ negation and and the exp function and
+ and ultimately the one over whatever we
+ calculated function. So with with with
+ all of those let's look at this example
+ that we have specific values for w0 x0
+ w1 x1 and w2 with these given values we
+ can do the forward pass calculate every
+ single value that we have in uh this
+ process and just to remind you we do
+ have some of the details some of the we
+ we know um For an exp function e ^ of x
+ what its derivative is with respect to x
+ constant
+ uh multiplication always the derivative
+ is the constant value itself 1 /x has a
+ derivative of -1 / x2
+ uh these are again what we know from
+ algebra. So and and if it's a constant
+ addition it's always the derivative is
+ equal to one. So as I said always in the
+ very beginning at the at at the end of
+ the network the derivative of L with
+ respect to L is always equal to one. So
+ that's where we start using this uh rule
+ the derivative of function 1 /x. Now we
+ can calculate upstream I said it's it's
+ one always at the end. The local
+ gradient could be one min -1 / x 2. What
+ is the value of x that whatever the
+ input is? So this calculation results in
+ minus uh.53.
+ So.53 is the downstream gradient which
+ defines the upstream gradient for the
+ next one. And in the next again the
+ function here is just a constant
+ addition where we know that the local
+ gradient equals to one. So one
+ multiplied by upstream gradient same
+ value goes back
+ uh next step is the exp function. So for
+ that again the lo the upstream we
+ already have the value for the local
+ gradient it's e to the power of x what
+ is x the input of to the of this uh step
+ minus one. So calculating this will give
+ us minus.2
+ and this goes back to the next step.
+ Here we again have a multiplication with
+ a constant number which defines the
+ local gradient equal to that um number
+ that that uh constant value and
+ defining the new gradient downstream
+ gradient and going back now here we have
+ an addition function where we are
+ getting some um data some some
+ information sorry two inputs
+ um of the different values here. And
+ again, if you want to calculate the
+ upstream gradient, it's 02 already. We
+ have it. The downstream at the local
+ gradients will be equal to
+ uh one because it's just an addition
+ between two values and an addition. The
+ derivative of x + y with respect to both
+ x and y is always one. So both inputs
+ will be the same. Then we have
+ multiplication operations with
+ multiplication.
+ Uh upstream gradient again we have the
+ values and the local gradients with
+ respect to a multiplication val is if we
+ always have say for example a multiplied
+ by x. The derivative of this with
+ respect to x is always a the other
+ variable. Right? So here for the first
+ one it's minus one which is the value of
+ x and for the second one it's two which
+ is the value of w. So the other other
+ variable whatever the value it has. So
+ with that we can calculate everything
+ and then then also calculate the the
+ ones with respect to w1 and x1. Again,
+ we made all of these calculations so we
+ can identify how much W should be
+ changed in order to step towards the
+ optimal point in the neural in the
+ network.
+ So this was another example. There are
+ so many different ways to
+ draw a computational graph. This was not
+ the only one that I I explained. So we
+ can actually lump all of the function
+ together and define a sigmoid sigmoid
+ because this is basically sigmoid of a
+ linear function. Right? So the linear
+ function could be here and then all of
+ these operations could be defined as
+ sigmoid. And actually sigmoid is
+ interesting and very useful to um to use
+ because the local gradient using sigmoid
+ is dependent on sigmoid itself. So the
+ local gradient of sigmoid with respect
+ to the variable x if we do the
+ calculations and simplify it's 1 minus
+ sigmoid multiplied by the sigmoid of the
+ same x. So it's actually a very very uh
+ useful uh framework. So anyways uh
+ useful function and easy and in order to
+ calculate the upstream um the the the
+ downstream gradient again what the
+ upstream gradient was was value one and
+ if I calculate the local gradient which
+ is this function replacing x with what
+ the input was which is one
+ it's it's how this will be calculated
+ multiplied by one will be 2 which is
+ actually the exact same value that we
+ had from before doing it um separately.
+ I want to summarize and and say that um
+ there are few patterns in in the data
+ often um very much in for the for the
+ for the nodes that um we can actually
+ kind of memorize. uh there is AD gate
+ for the AD gate it's always a gradient
+ distributor because of the the the
+ properties of addition that I explained
+ the gradients will uh remain the same as
+ whatever its input is for the
+ multiplication gate it's the it's a swap
+ function again I told you gradient of xy
+ with respect to x is y with respect to Y
+ is X. So it's kind of a swap and then
+ um there is copy gate in the copy gate.
+ copy gate it the operation that happens
+ is is just an addition of what is coming
+ uh to the network and to the node or
+ gate the gate and then ultimately
+ there's a max gate which is actually
+ something that we use quite often very
+ much similar to the relu function max um
+ gate has the gradient of because it's
+ it's up it's taking a max between its
+ inputs so whichever the max value was
+ you just relay the or route the gradient
+ towards that um direction.
+ So with that um it's it's very simple to
+ now implement a neural network forward
+ pass compute all of the steps and then
+ in the backward pass we start computing
+ the gradients and step by step I explain
+ that the gradient of the uh fun the loss
+ function with respect to itself is
+ always one and then we start from the
+ end of the network and go up. You can
+ see here that we are going uh up. So
+ this is the sigmoid function
+ calculating the gradients. Then going up
+ that was the add gate. We had another
+ add gate and then we had two multiply
+ gates which basically very simply um
+ gives us the implementations.
+ And with this type of formulation, what
+ we can do is just do some implement
+ modular modularize every um function in
+ the in neural network and create the
+ forward and backward APIs for every
+ single function that we need in the
+ neural network. So in this case this is
+ a multiplication gate that because for
+ multiplication we need to access the
+ inputs for use in the backward pass we
+ often save them memorize them but then
+ calculate the forward pass values and
+ then the backward pass calculate the
+ gradients. So this means we can write
+ our functions and put the forward and
+ backward passes all in. And this is how
+ PyTorch operators right now look like.
+ If you look at the sigmoid layer for
+ example, it's just the forward pass.
+ Although
+ um in this very function, it's not
+ implemented. It's it's somewhere else in
+ the C++ code in the C code um that it's
+ actually implemented in PyTorch. But
+ then the backward pass of sigmoid is
+ also calculating the same function that
+ we just uh talked about.
+ So with this um
+ the so far what we've what we've said uh
+ and I actually covered most of the
+ examples that I wanted to cover in um
+ using the scholar values. All of the
+ examples were were were just scholar
+ values. But we know that um all of these
+ operations could actually be implemented
+ in vector or matrix uh forms. Just
+ expanding on that um piece here. Um we
+ talked about this that with the scholar
+ to scholar setting so far what we've
+ talked about uh for any input x and y
+ being scholars. So um the derivative
+ will also be a scholar which means if we
+ change x by a small amount how much the
+ value of y uh will change if it's now
+ vectorzed and and there are vectors if
+ if x is a vector of n elements and y is
+ a scalar a vector to a scalar uh
+ derivative then in this case the
+ derivative will also be a vector. vector
+ and every single element in that vector
+ means if we change x by a small value
+ that that value then how much the amount
+ of y changes then the entire amount of y
+ because it's just one single value and
+ then there are also vector to vector uh
+ frameworks where x and y both of them
+ are vectors of arbitrary size n and m in
+ those cases the derivatives will form a
+ matrix or what we call Jacobians
+ and and there
+ uh for each of the elements in X if it
+ changes by a small amount then uh this
+ derivative tells us how much each
+ element of Y will be changed again look
+ at the sub u scripts here they are not
+ um completely they're not the They could
+ be different for every single element in
+ this jubian. There has a there's a clear
+ meaning. And then how we can do or or um
+ see it and visualize it in here is that
+ if you want to backrop uh with vectors
+ say xy and z are vectors of size dx, dy
+ and dz. Again the loss
+ derivative um L is the loss itself is
+ always scholar because that's always one
+ value we want to uh minimize but then
+ calculating the upstream gradient will
+ result in also a vector DZ same size as
+ its u
+ um variable Z and same story happens
+ when it comes to downstream gradient in
+ in downstream gradients. U actually
+ before going to downstream gradients let
+ me tell you a little bit about the local
+ gradients where we have
+ uh
+ gradient of Z with respect to X and uh Y
+ and in this case that's the part that I
+ said there will be Jacobians because now
+ the matrix the the gradients will turn
+ into matrices. So we have two Jacobian
+ matrices here um defined by the size of
+ their input by multiplied by the size of
+ the output and um and then this results
+ in downstream gradients that are
+ multiplication of upstream and the um
+ local gradient and there we get same
+ size as the inputs. X itself. So the
+ we will have a vector again here because
+ the input was a vector same size in
+ terms of the
+ gradients. Um
+ I just mentioned that gradients of
+ variables with respect to loss always
+ have the same dimensionality as the
+ original variable itself as also shown
+ in this um slide. So um
+ back prop with vectors was that's just
+ one uh one example here. Let's say we
+ have a function which is the max of zero
+ and x. That's that's the relu function.
+ So this is an elementwise function that
+ takes the input takes a max between zero
+ and if it's non zero if it's uh non-
+ negative it passes through otherwise
+ replaces it with a zero. Assume you get
+ some upstream gradients and there now we
+ need to build a Jacobian matrix here and
+ this Jacobian matrix in this case
+ because this is an elementwise operation
+ it doesn't have any dependence on any of
+ the other inputs only the dependence is
+ on the value itself. This is a very
+ sparse matrix only has value on the main
+ diagonal. And those values are actually
+ either zero or one depending on if the
+ max was actually um taken or a zero was
+ if the the value was passed through or
+ or just the zero was replaced um with it
+ um in in its place. multiplying it by
+ the upstream gradient gives us the
+ downstream gradient and um this is how
+ um the calculations are done. As I said,
+ Jacobian here is mat is is a sparse
+ because in this case the operation is
+ element wise and that could actually be
+ instead of in the in the backward pass
+ instead of calculating that huge sparse
+ jacobian matrix what we do is just use
+ these rule-based calculation of the
+ gradient for for this max function. So
+ we don't really store that that matrix
+ and and do not calculate that because we
+ know the how the the function uh
+ operates.
+ And then this could also be extended to
+ matrices um and even tensors if the
+ inputs are not vectors. They are high
+ higher dimensionalities uh high
+ dimensionality data. So in those cases
+ again the gradients with respect to the
+ variables would be of the same size as
+ that specific variable and calculating
+ the upstream and downstream calcul uh
+ matrices and derivatives is going to be
+ done same as how we discussed uh and and
+ showed
+ earlier for vectors and then when it
+ comes to the local gradients although um
+ however it's going to be a huge matrix a
+ huge jacobian because we have a matrix
+ as in as the output and the matrix as
+ the input and then the local gradients
+ will be the
+ same size as the multiplication of its
+ input size and and the output size. So
+ it's it's going to be a huge matrix by
+ itself. Let me give you an example. If
+ this is input X and W as as input for a
+ node for a gate with matrix
+ multiplication,
+ what happens is
+ uh and and generates this this Y as the
+ output. Calculating
+ derivative of L with respect to Y gives
+ us these Jacobian matrices. And say we
+ have a batch size mini batch size of 64
+ and dimensionality of those matrices is
+ is 4,96
+ then this means that that Jacobian
+ matrix that huge Jacobian matrix will be
+ over 256 GB for just one single multiply
+ um matrix multiplication.
+ So in order to
+ simplify this we often um what we do is
+ we try to look at the values and how
+ they impact each other. For example,
+ what part of parts of Y will be affected
+ if element one element of X um gets
+ impacted. So there uh x uh n and d this
+ this specific one often affects just one
+ row in the output. And this is um this
+ basically helps us uh identify for
+ calculating each of these nodes. We
+ don't need to create the huge jacobian.
+ we can actually write the backward pass
+ functions uh specifically for matrix
+ multiplication
+ uh in a more efficient way and uh I'm
+ almost done so you answer this question
+ how much does x and d affect the value
+ of y and m so this is y and m that is um
+ getting impact from x and d
+ how much Does it get impact? It means
+ that what should I place or or put as
+ its gradient with respect to um
+ the the specific value x and d.
+ Just to remind you this is a
+ multiplication operation.
+ In multiply gates it should be a swap
+ right. So whatever
+ this this uh the answer to this question
+ is something a value in W right remember
+ that we had this multiplication gate
+ which was a swap multiplier so there is
+ a swap happening here so the value of
+ X being affected uh affecting Y one of
+ the elements in Y is going to be
+ dependent on
+ a W that is in row D defined by the X
+ matrix and column M defined by the Y
+ matrix. So it's swapping the values.
+ It's the same swap but here now we have
+ to look at the the giant matrices and
+ find which which uh specific element uh
+ it should be and then based on that we
+ can actually replace the entire thing
+ with matrix multiplication
+ matrix operations. The gradient of L
+ with respect to X will be defined as
+ this simple matrix operation. And then
+ the gradient of L with respect to W will
+ be defined as this very simple
+ multiplication. Again swap here for X we
+ include the entire W. For W we include
+ the entire X and do the uh
+ multiplications.
+ These formulas makes it easy to to
+ implement larger and and harder
+ operations
+ and um get them implemented in the
+ backboard passes. All right, we're done.
+ Um just to summarize, we talked today
+ about fully connected neural networks.
+ We went through all the steps needed for
+ back propagation, the forward passes,
+ backward passes and next session we will
+ be getting into the topic of
+ convolutional neural networks.
+ Thank you.
