@@ -1,0 +1,1246 @@
+0:05
+Today's lecture topic will be about regularization and optimization, which are two very important concepts more
+0:12
+broadly in deep learning and machine learning, but especially important for computer vision. And we're going to start with a recap from last week
+0:20
+and discuss some of the topics that we discussed last time. So we really honed in on this idea
+0:27
+of image classification as a core task in computer vision. And what this task is is given an image as input,
+0:34
+you try to map this image to a label inside of a set of labels.
+0:40
+So here we have five different labels, cat, dog, bird, deer, and truck. And the goal is to assign the correct label
+0:47
+to the input image. And you're creating some model or some function that takes an image as input and outputs the specific label here.
+0:55
+And we also talked about a lot of the challenges for classification. So one of the main challenges is shown in the top left here,
+1:04
+but it's this idea of the semantic gap between what we as humans perceive in the image, which is the cat,
+1:10
+and what it's actually represented in the computer, which is this grid of pixel values
+1:16
+where you have this multidimensional array or tensor, and you have discrete values for each of the pixels.
+1:24
+This is very different from how we're perceiving the image and just deciding that this is a cat. So being able to map from this complex numeric representation
+1:33
+into one that we humans understand is the core challenge here. But also there's challenges surrounding the images
+1:39
+themselves. So if you look at something like the illumination of the scene, so here you'll have different pixel intensities
+1:46
+based on where the lighting is in the scene. Also you could have certain parts of your object
+1:52
+are in the shade and harder to see. Cats by nature are very deformable, so you talk about deformable objects that can move around
+1:58
+and twist and bend in different ways, so they won't always have the same shape. And this can prove challenging if you're
+2:04
+trying to design an algorithm to detect objects. There's also the challenge of occlusion. So you could have a cat that's hiding underneath the cushions
+2:11
+here, but we as a human can clearly tell it's a cat because of the tail, how it's sticking up at the end here.
+2:16
+And then the way that cats behave, we can infer that this is a cat. You'll also have things like background clutter, where
+2:23
+the object could blend into the background. So we need to account for this somehow as well. And finally, there's this idea of intraclass variation, where
+2:31
+different objects in the same category can look very different from each other, but we still need to group them all into the same category.
+2:38
+So here are a lot of just the challenges of recognition, and why it isn't such a simple problem where you can just
+2:45
+write if else rules to account for everything, and just simple logic to classify.
+2:50
+So if logic is thrown out the window, you can't just create these logic rules, how do you actually create a classifier?
+2:56
+Here's where we talked about data-driven approaches. And we talked about, basically, the simplest machine
+3:02
+learning model, which is this k-nearest neighbors model. And the idea is that you look for a given data point, what
+3:10
+are the existing data points in your training set that are very close in distance to your new data point
+3:18
+coming in. And for the 1-nearest neighbor case, this just results in--
+3:23
+you find the closest data point, you assign it that class label. And you can also look at multiple nearest neighbors where
+3:29
+you're assigning the most common class label among those nearest neighbors. So we talked about these two different approaches.
+3:36
+We talked about how you ideally, don't want to split your data set into train and test,
+3:41
+but you can do train validation and test, so that you can use this validation set here
+3:46
+to actually help you choose your hyperparameters. So the main hyperparameter for k-nearest neighbors
+3:52
+is this k, 1 or 5 in these examples. And what we showed is an example where you're plotting what is your accuracy on this validation set
+4:00
+here over the different k values here. And you would choose the one that has the highest accuracy.
+4:07
+So this is how you use the validation set, and then you would reserve this test set for-- OK, how does your model do on completely new data
+4:13
+it's never seen before? That would be the purpose of the test set. This is all just recap.
+4:18
+There was a bit of confusion about distance metrics. We put a post on Ed that explains this in more detail.
+4:24
+But we talked about two different distance metrics. The most two commonly used ones in machine learning,
+4:30
+which are the Manhattan distance or L1 distance and L2 distance or Euclidean distance.
+4:36
+L2 distance is like if you imagine just the straight line distance--
+4:42
+how we think of distance in everyday usage of the word geometrically. And then Manhattan distance is this idea where you can only
+4:49
+traverse left and right and up and down in this diagram, and you can't move diagonally. So specifically looking at just one quick example here.
+4:57
+The reason why all these points on the line are the same distance from the origin here is because you can't move diagonally,
+5:03
+so you have to move in this case up 0.5 and to the right 0.5, so the total distance is 1, whereas here you're
+5:10
+just going a straight line but it's 1 also. The same distance here. Whereas in the L2 distance, all the points
+5:18
+equidistant from the origin here form a circle because you can just go in the direct line here.
+5:23
+So this is maybe a brief explanation. The final thing we honed in on last time
+5:30
+was this idea of a linear classifier. So the basic idea in the basic setting that we did
+5:36
+is we have an image, which is say, width 32 and height 32, and there are three pixel values for each
+5:44
+of the spatial locations in our image representing the red, green, and blue intensities forming the color.
+5:52
+And the idea is we take this array of numbers for our image, and we flatten it out into an array of just 3,000 different
+5:59
+numbers, 3,072. And then we are multiplying this vector by our weight matrix W.
+6:06
+And the basic idea is if we have a weight matrix W that has a height here of 10 and then the width is 3,071,
+6:18
+we're multiplying each of these rows by our input sample x. And this will give us 10 resulting class scores.
+6:26
+So oftentimes we'll add a bias term as well, which would just be 1 bias term for each class.
+6:32
+So this would be a size 10 vector here. And we also talked about three different ways
+6:37
+you can view or think about these linear models. One is the algebraic viewpoint, which I described here,
+6:43
+where each row is represented-- independently representing the class.
+6:48
+And you multiply it by the input vector x, you get your score
+6:53
+and you add the bias to get your final score. And you do each row independently in the sense. You can also view these learned class weights here
+7:04
+as templates where if we then reravel the vector into the original shape of the image,
+7:13
+we could plot the intensities here and understand what
+7:18
+is the, template per class, which is what this visualization represents.
+7:24
+And then the final way you can think about it is a geometric viewpoint, where
+7:29
+each of these rows in our weight matrix are represented by these lines here in our input space.
+7:38
+And specifically, the line is where we set this equation to 0, which is the decision boundary.
+7:45
+So this forms the point where above the line you could have a positive score, and below the line
+7:50
+you would have a negative score for the class. So these are the different viewpoints
+7:57
+or for how you can view these linear models. They're all doing the same thing. And one nice thing about the geometric viewpoint
+8:03
+is that if you visualize your data, like, say, you want to classify blue versus red here,
+8:09
+it's very easy to tell that you can't draw a line that perfectly separates the data here.
+8:14
+So it's nice way you can gain intuition about what is possible for linear model to do.
+8:21
+OK. I think that's the high-level recap of what we discussed last time.
+8:27
+I'll actually be going into a little bit more detail on the new content for this lecture now,
+8:34
+but I just wanted to pause briefly if anyone had any questions about what we discussed last time or at the beginning of this lecture, feel free to ask.
+8:41
+Yeah. So the question for those online is for this visual viewpoint, is this the same as running k-nearest neighbors?
+8:49
+And this would be maybe one of the neighbors that you're comparing against? Are they mathematically equivalent?
+8:55
+No, they're not the same because these templates are formed from this line, so it's not one specific data
+9:02
+point. But you can still calculate the templates based on this--
+9:09
+they would represent more like, if you see in this diagram here there's the line pointing in the direction of the class,
+9:15
+so it would be representing this point here. Yeah, so the question is, how did we get this 3,072 number?
+9:22
+So the idea here is that if the height of our image is 32 pixels and the width is 32 pixels, and then each location in the image
+9:31
+is represented by three values, the red, green, and blue pixel intensities, we would then get 32 times 32 times 3 total values
+9:38
+to represent the entire image. And that's how we get this 3,072 number.
+9:44
+So here's, I guess, very specific example of a linear model here.
+9:50
+And when we multiply our input x by our weight matrix W,
+9:56
+we get the resulting scores for these different classes. And you can see that for cat it's
+10:01
+not doing so well because car has a higher score. And we want the highest score for the correct class.
+10:07
+Also, here on this second example does pretty well because it's doing it correctly. But then in the frog example, it completely wrong,
+10:14
+where it's by far the lowest score of the three. So intuitively, we can tell that these scores are not very good.
+10:20
+But how do we mathematically formalize this intuition? And how do we determine how good a given model is?
+10:26
+This is the idea of a loss function, which tells you how good or specifically tells you how bad a classifier is.
+10:34
+So given a data set of examples where we're indexing with this
+10:39
+letter i-- we have Xi as each of the training examples, yi as each of the training labels--
+10:45
+we can compute the loss over our entire data set, where we calculate this loss for each training example
+10:53
+by sending it through our model here, which is this f of XiW. We get our label.
+10:59
+And then we compute it compared to the ground truth label yi. And we just take the average over our whole data set.
+11:05
+So this is how we do this. We talked about, in last lecture, the Softmax loss
+11:10
+or the cross-entropy loss, which is the most commonly used loss for classification.
+11:16
+So I won't discuss that again in so much detail here. But basically, it's very high loss
+11:22
+when you predict low probability of the correct class. It's very low loss when you're predicting the correct class
+11:29
+at very high probability. So this what I just explained is all
+11:37
+contained within what we call the data loss. So this is a loss that tells you how
+11:43
+well do the model predictions match our training data. And obviously, we want this to be very low. And if it's very low, it means our model is
+11:49
+fitting our training data well. But there's a second component, which I'll discuss today,
+11:54
+which is this regularization term of the loss function. So what this does is, is it's intended
+12:02
+to prevent the model from doing too well on the training data. So it actually does worse on the training data,
+12:07
+but the goal is to make it do better on new test data or unseen data. So worse on training but better on the test set.
+12:14
+That's the point of regularization. And we'll go over a lot of the intuition for how to think about it in the next slides here.
+12:20
+But the high-level goal is to do worse on the training data, but then better on the test data or just unseen data.
+12:26
+That's the point of regularization. Yeah, so we're computing the loss on each of the i training examples.
+12:33
+Yeah, so the loss of the i-th example uses the Xi and the yi.
+12:40
+That make sense? I mean, you could not have an i here. But this is just saying that i-th lost [INAUDIBLE].
+12:46
+Yeah. Yeah, you normally don't have a different loss for each i if that's what you're asking. Yeah, yeah.
+12:52
+So it's just-- you could just-- we described Li as the loss for the i-th training example, so we're just using it here.
+12:58
+But yeah, it could be i. So for regularization, people usually
+13:05
+have this intuition when thinking about it, where this is a toy example. And the idea is we want to fit some function to these points
+13:13
+where our input is x and our output is y. And you, say, have two different types of models, f1 and f2.
+13:20
+And you're trying to decide which of these is better. So f1 goes through all of our data points,
+13:26
+so the training or the data loss will be very low because it's basically doing it perfectly, whereas f2 doesn't go
+13:33
+through every point perfectly. But intuitively, it feels like, probably, f2
+13:38
+is a better model when we're now testing on new data we've never seen before. So regularization captures this intuition of you
+13:47
+don't want to overfit your data so hard, and you might actually be better off with a model that fits the data less, but is either simpler or has
+13:55
+some other properties that make it a better choice. And so if we ask, OK, how are these models going
+14:02
+to do on new data that's within our same distribution? You'll find that f2 does a much better job at modeling.
+14:07
+So here's it's doing better on the unseen data. So I think, there's also an intuition
+14:14
+in this previous example that's demonstrated very well where we're preferring simpler models where it's like Occam's razor, which is this idea in philosophy
+14:23
+and also scientific discovery where if you have multiple competing hypotheses, you should go with the simplest one first
+14:29
+and then if you know for sure that's wrong, then you can start trying out more complicated ones as you go. But this is maybe also some intuition
+14:34
+you can have for why regularization can be useful.
+14:40
+And then one final thing about this equation that I didn't touch on yet is this lambda parameter here. So this is the regularization strength, which
+14:47
+is another hyperparameter. So we might use training and validation sets to set what is the optimal lambda here as well.
+14:55
+But the basic idea is we can set this to a floating point between, I guess, 0 and infinity, where 0 would be basically,
+15:02
+there is no regularization, up to infinity. You have a really progressively stronger regularization.
+15:09
+So it's very much a tunable knob you have for determining how much you
+15:14
+want to prevent the model from fitting to your training data. And I'll go through some simple examples now of regularization.
+15:23
+So here we have L2 regularization, which basically, what you do is you have your weight matrix,
+15:30
+you square each of the terms in your weight matrix, and then you sum them all together. That gives you your score here that you then multiply by lambda
+15:38
+and you add to your total loss. That's L2 regularization. L1 regularization is very similar,
+15:44
+but instead of squaring, you're taking the absolute value. So in practice, there are some differences between how these two regularizations perform
+15:53
+when you're training models. So one of the things that happens with L2 regularization, because you're squaring each of the values,
+15:59
+when you have a really small value, it gets squared, like, say 0.001. You square it, it becomes even smaller.
+16:06
+So L2 regularization allows for these really small values close to 0, because you then square them,
+16:11
+so they become even smaller. And so your penalty here is very low if you have these very small values with L2.
+16:19
+Whereas L1 you're not squaring it. So it's just whatever the baseline value is. It's not like it's getting smaller
+16:24
+before you're computing this regularization term. So in practice what this leads to is L1 regularization.
+16:31
+You get a lot more values that are 0, actually, in your weight matrix or very close to 0.
+16:36
+Whereas L2 you can have generally it's more spread out where you have values that are small but non-zero
+16:44
+because the penalty becomes so small. It seems pretty clear to you why L2 prefers spread out
+16:50
+weights that are all small. But why does L1 prefer sparse vectors? So I think the way to think of it is that if a value can be 0
+16:59
+and your performance is roughly the same, then this would push you towards zeroing that value.
+17:05
+Whereas for L2 what you might have is the value just becomes very small but non-zero because of the squaring.
+17:12
+So the question is, can we talk about what is pushing towards a 0 value mean? So we're going to talk about more--
+17:19
+how we use this loss term. But the basic idea is we're trying to minimize it.
+17:24
+So we're trying to minimize the loss or minimize the error of our model. And if we have a term here, which
+17:31
+is giving us positive values that it's not affecting the model performance and the data loss,
+17:37
+we will remove those through the optimization procedure. It's a trade-off. You're trying to optimize the joint, some
+17:44
+of the regularization term, the data loss term. So if your data loss isn't changing much, but you're able to go lower on the regularization term,
+17:52
+you'll get a more optimized model. So it will be preferred based on trying to minimize the overall term.
+18:00
+So I think, we'll also touch later in the course about much more complex forms of regularization
+18:06
+where they're all doing this basic idea of worst on the training data to do better on the test data.
+18:11
+But some of them will even change the layers of your model, so they actually get pretty complicated.
+18:17
+This is an ongoing research area of how to regularize models. There's new papers each year, so lots of stuff here.
+18:24
+We'll only cover a small subset in this course. So to summarize, why do we regularize models?
+18:32
+The first is it allows us to express some sort of preference over weights. So if for some reason in our problem,
+18:38
+we think, the solution should be spread out or should contain a lot of sparsity, where a lot of the values in the weight matrix are 0,
+18:44
+we might prefer one set of regularization L2 versus L1 over another.
+18:50
+It also can, depending on how we're regularizing, make the model simpler so that it works better on test data.
+18:56
+So it could simplify the model if we're, say, heavily regularizing really high polynomial terms in our model,
+19:02
+for example in what I showed earlier. Something we won't touch on in too much detail
+19:08
+is especially L2 regularization can actually improve the optimization process, because if you imagine this squared is like a parabola.
+19:17
+So if you're plotting y equals x squared it's a parabola. And these are convex, so you get a lot of nice optimization
+19:23
+properties where there's a global minimum. We won't touch on that in this course. That's beyond the scope. But know that for certain types of optimization,
+19:30
+regularization actually helps train the model faster too.
+19:36
+I guess I have a question for you all. And what we'll do is you'll do a 1 if it's W1 and 2,
+19:44
+with your hand if it's W2. So which of these two weights, W1, W2,
+19:51
+would the L2 regularizer prefer? So we have our input x.
+19:57
+When you multiply it, you do the dot product with the weights, you get the same score, so you get a score of 1 either way.
+20:02
+And here's where the data loss would be the same. And we're trying to determine which of the weights
+20:08
+would our regularizer prefer. So go 1 if you think it's W1 and go 2 if you think it's W2.
+20:15
+All right. Lots of 2s. Yeah, it's W2 because, as you said, it's more spread out. You're going to be squaring each of these turns so it's 1/4 you
+20:21
+square, it becomes 1/16. You sum it all together, it's 1/4 as the total regularization
+20:27
+term here, and then here you square it, so it's 1. So it's four times lower in terms of the regularization
+20:32
+loss. And, as we said, the intuition is as you like, more spread out weights.
+20:38
+And then here's another question, which one would L1 prefer now? So you do 1 if it's weight 1 and 2 if it's weight 2.
+20:49
+We got a lot of 1's. So this one's actually a bit of a trick question. So what L1 regularization is you sum each of the terms,
+20:56
+so they'll both be sum to 1. In practice, you probably would see this one because, as we said, sparsity.
+21:01
+But in terms of a loss standpoint these two weights would actually be equivalent in terms of L1
+21:07
+because 1 is just the sum of these 0.25 four times,
+21:12
+and the other one is just 1. So they're both sum to 1. And so the actual regularization term is the same for these.
+21:21
+Yeah, OK. So what's an example where L1 would be preferred if this is like 0.9, for example?
+21:27
+So just to recap, we have a data set of x,y pairs.
+21:32
+And we have some way to calculate scores for each of the classes, which in our case
+21:38
+is just a linear model. You're doing a matrix multiply. The loss for each of the training examples in the Softmax
+21:47
+loss, which we discussed last time, is you exponentiate each of your scores,
+21:53
+and then you divide by the total sum of the scores. So you exponentiate to make them all positive.
+21:59
+And then you sum to get a probability distribution. So the final values in this all sum to 1.
+22:05
+And you have a score for each class. And you take the minus log of the correct label. So this is the probability of the correct label,
+22:12
+which is given here. And the full loss is you just run this over each of your training examples,
+22:19
+calculate Li for each of those, And? Then you add your regularization term here depending on what is the weights of your model.
+22:27
+Why do we use Softmax in general? So Softmax is great because what it does as a function is it converts any set of floating
+22:35
+point numbers into a probability distribution where they will sum to 1.
+22:40
+And depending on the value of the score, that will translate to the relative probability
+22:45
+of that value. So if you have a really high positive number and everything else is very low negative, you'll have nearly 1
+22:51
+for Softmax and 0's almost for the other values. So it's nice because it converts any list of floating point
+22:59
+numbers into a list of probabilities based on the values of the list.
+23:05
+That's the main utility of Softmax. So the question is that you can view the regularization we
+23:10
+talked about, which is L1, L2, as a way of regularizing based on the magnitude of the weights, which is true.
+23:17
+And how does that translate to simpler models? So I think in L1s explanation is actually pretty simple, because if we prefer, say, terms that have a lot of zeros in it,
+23:28
+it's basically, a linear model with fewer coefficients. So that one is actually, I think, relatively straightforward.
+23:33
+But I think in general, a regularization is not always going to give you a simpler model. It depends on how it's used.
+23:39
+So for example, in the diagram we showed at the very beginning here, here you could imagine that you have L2 regularization
+23:48
+or L1 regularization where you're penalizing more the higher degree polynomial terms of your function.
+23:53
+So in that sense, it's pretty clear how you could design regularization to prefer a simpler model. But it doesn't always need to be that way.
+24:00
+Really, what it is this idea of doing worse on the training data to do better on the test data, and that's not always going to give you a simpler model.
+24:07
+And in fact, there are many types of regularization like dropout that
+24:13
+actually make your model more complex but give you better performance on the test data.
+24:22
+Cool. So now that we've talked about how we can calculate how good a given W is based on the training
+24:30
+data and this regularization term, the question now is, how do we actually find the best W?
+24:37
+And this is what optimization is, which is the second half of today's lecture. So I think when people describe optimization,
+24:45
+they will usually use this idea of a loss landscape, which you can think of as a normal landscape,
+24:51
+like on planet Earth, where the up and down vertical or z-axis direction is the loss.
+24:56
+So this is the value you're trying to minimize. And then, say, in this example, you have two parameters in your model,
+25:02
+which is the x and y direction of where you are in this landscape. And the idea is you're just, basically, a person.
+25:08
+You're walking around this landscape and you're trying to find what is the smallest or lowest point in the landscape.
+25:13
+I think one of the reasons this analogy-- and this is a very commonly used analogy-- a little bit falls apart is because as humans, we can just
+25:20
+see, visually we can look into the distance and see what is the lowest point of the valley. But I think this analogy is actually pretty accurate
+25:26
+if you think of the person as being blindfolded. They don't have access to any visual information. They can only feel the Earth where they are right now
+25:34
+and understand what is the slope of the ground on the current point in which they're standing. I think if you view it in that lens,
+25:39
+this analogy actually becomes extremely accurate for how we're trying to find the best model.
+25:44
+And we have this complex landscape of different loss values depending on the parameters of our model, which
+25:50
+translate to the location of the person in this landscape. So how can you find the best point?
+25:58
+We could go with a really simple idea, which is maybe a really
+26:03
+bad idea, but it could work. So here it's just basically, a for loop where we're trying 1,000 different values of W randomly,
+26:11
+and we're just choosing the best one. So obviously, not very mathematically rigorous, but you will do better than a random baseline.
+26:19
+And if you had nothing else to go for, maybe this isn't so bad. You would get 15.5% accuracy on the CIFAR-10 data set, which
+26:29
+is the one I showed earlier with the frog and the car and things like that, with the 10 different categories.
+26:35
+But it doesn't perform very good. I mean, the state of the on this data set-- it's basically solved through modern deep learning,
+26:40
+and you get 99.7% accuracy. So clearly, it's not bad, but it's also, I wouldn't say,
+26:46
+particularly good. Strategy number 2, which is what I maybe explained a bit earlier,
+26:54
+is this idea of following the slope. So for this, you can imagine you're blindfolded
+27:00
+on the lost landscape, and you're feeling the ground underneath you. And you're thinking, OK, which way
+27:06
+is the slope of the Earth pointing me? And I should walk in that direction at all times.
+27:12
+This basic idea is the fundamental way in which we train all the models in this course and in which basically all deep learning models are
+27:18
+trained, where you're feeling the location of the current place in the loss landscape and you're going down the hill.
+27:24
+So this is a very intuitive way to explain it. We'll now go over more of the math behind it, but this is what you should be visualizing in your head.
+27:34
+So how do you actually follow the slope? So in one dimension, I'm sure you all are familiar with the idea of a derivative, which in calculus we
+27:41
+can think of as this limit h definition where we add a very small number to our current location,
+27:48
+we calculate the value of the function at that new location, we subtract the current location, and then we divide by the step size.
+27:55
+And as we take the limit for h to approaching 0, this gives us the derivative of the function at that point.
+28:05
+Now, this is for 1D, but in multiple dimensions you use the gradient, which is where you're calculating, essentially,
+28:11
+this limit definition for each of the values separately.
+28:16
+So you have a different derivative for each of your values. And you get a vector instead.
+28:23
+And this gives you the direction along each dimension. So you can actually calculate the slope in the dimension
+28:29
+by taking the dot product of the gradient with the direction and specifically the direction of the steepest descent
+28:36
+or down the hill is the negative gradient. So the gradient points up the hill. The negative gradient points down the hill.
+28:43
+So this is the direction we should be traveling if we're trying to get to the bottom of this lost landscape.
+28:50
+So maybe what are some ways you can calculate the derivative. A really simple one is you could just actually try to use the limit h definition with a very small h,
+28:58
+so you add 0.0001. You actually can compute the last two digits
+29:04
+of the loss changed slightly. So you can compute the difference, divide by the step size, and you can get an approximation
+29:09
+of your derivative here. And you could actually do this for each of your values
+29:15
+in your W. You just do this procedure over and over again. But it has a few problems.
+29:20
+It's very slow because you just need to loop through each of the values. It's also approximate, so you're not even calculating
+29:26
+the actual derivative. And especially, with floating point arithmetic you can get pretty significant errors here,
+29:32
+so this is not really preferred. But this basic idea or intuition of what we could be doing
+29:37
+is to calculate the derivative this way. But really we have the loss as a function of W.
+29:45
+So we know how to calculate the scores to get our loss, which is given by our function for our model.
+29:53
+And we can then compute the total loss with the regularization terms as well. And this entire loss is a function of basically W's--
+30:03
+the W's, the Xi's and the yi's. So you have your W matrix, you have your Xi's and yi's, and then you have this formula with maybe
+30:09
+some logs and exponents. But fundamentally, this is a function of W, X, and y.
+30:16
+And we specifically want to calculate the gradient, which is given by this Greek letter nabla of our loss
+30:22
+with respect to the weights. So we can imagine our Xi and yi's are held constant.
+30:29
+And we're trying to calculate the derivative just with respect to the weights.
+30:34
+So to do this, we can just use calculus, use the chain rule, use the different methods we've learned
+30:40
+for calculating derivatives based on complex equations
+30:45
+or not so complex. But you need to have some logs and exponents and chain rules here to solve it.
+30:51
+So this will be an exercise in the homework. So I won't go through step by step how to do it now. But it is relatively straightforward.
+30:56
+I think conceptually it should make sense to you all how you do this. You assume that X and the y's are constant. Then you solve for what is the derivative as you change W.
+31:04
+So now we actually have a way where we can calculate W based on our--
+31:10
+sorry, dW, the gradient of W, with respect to our data and the current W, and whatever our loss function
+31:17
+is, which is how to compute the error. So this is, I guess, a summary.
+31:23
+So you could do a numerical gradient, but it's approximate slow. And the nice thing is that it's very easy to write.
+31:29
+You just add a really small h, take the difference divide by h. The analytic gradient is nice because it's exact.
+31:36
+It's fast, but you could-- potentially, if you're creating a new gradient from scratch, like new code to calculate it from scratch,
+31:41
+you could have an error in it. So if you are doing this, people normally will have a gradient check, which is where they try the h version, where they have a really small h
+31:50
+value, and then they make sure that it's around the same neighborhood. And that's a good way to make sure you don't have any bugs in your code.
+31:57
+There'll be gradient checks in your homework assignments to make sure your implementations are correct also.
+32:02
+Yeah, so the question is we often say we want a loss function that's differentiable
+32:07
+because then we can calculate the gradients, but if we have a better loss function somehow and we can't analytically calculate the gradient,
+32:16
+but we could use this h numerical method, could we do that?
+32:21
+I think, in general, it's hard to construct a better loss function that would be non-differentiable.
+32:33
+You could possibly, though. There is just a true loss function that is the best for your case but it is not differentiable.
+32:38
+You could go with this approach, and it may work. I think, it would struggle if, for example,
+32:44
+your loss is just truly non-differentiable across all points, and it's basically like a cluster
+32:50
+of non-connected points, then moving in the steepest descent
+32:56
+wouldn't really get you necessarily at your best solution if they're not well connected and forming this geography.
+33:02
+So it could work. But I would think that if your loss is not differentiable across most of the domain then
+33:08
+probably you wouldn't be able to use these approaches to find the bottom point.
+33:14
+Yeah, so I guess TLDR of the explanation is that if your function is convex, then it works very well with this gradient descent
+33:23
+or steepest descent type of approach. But if you have a non-differentiable, non-convex function, probably this approach won't
+33:28
+work as well because you're not going to be stepping in the right direction. It's not necessarily error prone if your code is perfectly good,
+33:36
+but maybe you have a mistake in your code and it's hard to tell right away. But the h, the limit h definition
+33:42
+is very easy to code up. You just set h to be a very small value, you run it through your function, and you add a very small amount.
+33:48
+So that's less error-prone for implementation. [INAUDIBLE] For implementation.
+33:53
+OK. Not more error prone if it's worth it. Correct. OK. So now I'll talk about this fundamental algorithm
+34:01
+for optimization called gradient descent. And the basic intuition is what we already explained before. We calculate the slope at each point when
+34:08
+we're on our loss landscape, and we take a step in the direction downwards towards the bottom of the loss landscape.
+34:14
+So what we do is we calculate the gradients of our weights given the loss function, the data,
+34:22
+and our current weight values. This tells us how much we should change each of the weights to go down the slope, and then we have to have a step size.
+34:29
+So how far down the hill are we taking a step in the direction? And so you go down the hill, so it's
+34:34
+the minus sign here in the step size times the gradient. So this is basically what gradient descent is.
+34:41
+You're calculating the gradient at each step. And you're moving a fixed direction in the direction of the negative gradient, down the hill.
+34:51
+So given a concrete example here. So instead of this being a 3D loss landscape, often people will visualize it like this where we're looking
+34:58
+down at the landscape. And purple would represent the highest points and red would represent the bottom or the valley here.
+35:05
+And we could imagine we have our original W. We can calculate the loss. We know the direction of the slope, the negative gradient
+35:11
+direction. And this arrow might represent the fixed step size that we talked about before.
+35:17
+We're taking a fixed step size in that direction.
+35:25
+Yes, you can see it's fixed step size. But as the gradient becomes smaller,
+35:30
+we're still multiplying it by this fixed step size. So the effective step size actually does become smaller because the gradient is smaller
+35:36
+near the end where it's flat, or near the end where it's more flat. So this is what it looks like when
+35:42
+we're always heading in the direction of the steepest descent. So the question is, when we step down,
+35:47
+how we know when we're going to stop? Well, I guess in this formula you just keep looping forever
+35:52
+so you never stop. So this was probably not the best. Normally, you have a predetermined number of iterations that you run it for.
+35:59
+Or you can look at if the loss is not significantly changing by a fixed amount also.
+36:05
+You can have a tolerance for how much you're expecting the loss to keep decreasing by. And if it's no longer decreasing--
+36:11
+it's only decreasing by 1E minus 5 or 1E minus 9, maybe you stop there because it's good enough.
+36:16
+So those are the two ways you can determine when to stop is fixed number of iterations or stopping criteria of how much--
+36:23
+we're not really improving that much anymore.
+36:29
+So now I'll talk about the most popular variant of gradient descent, which is called stochastic gradient
+36:35
+descent. And when we talked about gradient descent before, we talked about calculating
+36:41
+the loss of our weights by summing over our entire training set, the loss of Li for each i in our entire n training sets.
+36:50
+But this is potentially a lot of computation if we have a very large data set.
+36:55
+So what stochastic gradient descent is, is basically, now instead of looking at the entire data set,
+37:01
+we're looking at a subset each time, which we call a mini batch or a batch of data. And so here if we look at the code
+37:08
+it's like we're sampling 256 data points from our data set, so the batch size is 256.
+37:15
+We evaluate the gradients of this 256 subset of our data set,
+37:20
+and then we do the same thing as before. So the reason why it's called stochastic gradient descent is because we're sampling a random subset of our data
+37:27
+set each time we're running the algorithm-- each step of the algorithm. So this is stochastic gradient descent.
+37:33
+You're basically running it on a random subset each time. And in practice people won't just
+37:39
+sample it completely random. They'll make sure to get through all the examples in their data
+37:45
+set and then loop around again. And that's called one epoch of training, where you loop through all your data samples once
+37:51
+in a random order. There are some problems with gradient descent
+37:57
+or stochastic gradient descent. So this visualization is the same type as the colored one I showed before where we're looking down
+38:05
+the loss landscape. But these curves are called the level set, where it's a set of points where the loss is
+38:11
+the same on all of them. So this is another way of visualizing-- very popular way to visualize top-down looking at the loss,
+38:17
+but it's without the colors. And so you could imagine that you have this phenomenon where
+38:24
+it's a really narrow valley, where it's really steep along the sides, and you're trying to traverse the center of the valley.
+38:30
+And gradient descent actually does run into issues here. Does anyone have any ideas for what could go wrong?
+38:38
+Yeah, so one of the things you could do is overshoot where you're moving up and down along this direction.
+38:45
+And if it's steep enough and your step size is large enough, you might actually oscillate out of the valley.
+38:51
+So you can imagine if your step size is very large and this is really steep, you're actually going to be gaining like you're moving
+38:57
+out and out each time because you always have this fixed step size. So if it's steep enough, you could just
+39:03
+bounce out of the valley. That actually does happen if your learning rate is too large. So that's one thing that can happen.
+39:09
+And then also, even if you're learning rate is not too large, your step size is not too large, you
+39:16
+can have this phenomenon where you're sort of jittering because the gradient is much larger in the steep direction.
+39:23
+So you're jittering, but you're not making very much meaningful progress towards the actual center, because you're spending all this time oscillating back and forth, up
+39:30
+and down. So this is a pretty big issue with just default SGD.
+39:36
+And then mathematically, just an aside, the loss function we consider here to have a high condition number, which
+39:42
+is the ratio of the largest to smallest singular value of the Hessian matrix, which is the second derivative.
+39:48
+So you can imagine the second derivative along this up and down direction is very high. But then side-to-side it's very low because it's very flat,
+39:56
+so that's what causes this phenomenon. All right.
+40:01
+So one of the things we also might have an issue with SGD is what happens if the loss function has a local minima or--
+40:11
+a local minimum or a saddle point? So for example here, for just the very end of this curve
+40:19
+it's completely flat. So if we were to imagine we're moving down the hill here,
+40:26
+we would just get stuck here because it's flat. And we wouldn't be able to progress any further, because when we take the gradient here is 0.
+40:32
+So this is actually a pretty big issue where it'll get stuck either in a local minimum
+40:38
+because once we reach here, we don't really have any direction to go. The gradient is 0.
+40:43
+Or it's very small, and we'll just oscillate back and forth here. And then here it could actually get stuck on this bottom example
+40:48
+because the gradient is 0 here, even though if it went a little bit further it could go down significantly more.
+40:55
+Yeah, so the question is maybe we can change the way we're doing the steps. Maybe we could use the Hessian to determine
+41:01
+the direction we go. We actually do have a brief slide talking about the Hessian style approach at the very end.
+41:07
+That's not very commonly used in deep learning. But the short answer is yes. There are going to be actually several ways in which you
+41:13
+can account for this that we're going to go into in like five minutes. So it's a good question. Yeah. We'll get to that.
+41:24
+So I think one of the other things that you might not know is that empirically, saddle points are actually
+41:29
+much more common as you move to higher dimensional models, so as your weight matrix gets larger and larger,
+41:35
+you're more likely to find these saddle points. And there's this paper describing the frequency of them. If you don't know a saddle point--
+41:41
+it's called a saddle point because it's shaped like a saddle on a horse. And at the center of this saddle,
+41:48
+the gradient is actually 0 in all directions, so it's like the bottom of this and at the top
+41:53
+of this carvature. And so in both the x and the y directions the gradient is 0,
+41:58
+so you could get stuck here despite being very close to going significantly down the loss landscape on either side.
+42:05
+So this is also a pretty common issue with SGD where these saddle points and as we move to higher dimensional spaces,
+42:12
+or this is equivalent to models with more parameters, this is more and more common. This is a big issue.
+42:18
+And then a final issue with SGD is that we are sampling a subset of our data each time.
+42:26
+So we're not looking at the whole-- this represents the entire loss across all the data. But we're looking at just a subset each time.
+42:33
+So we'll actually have somewhat noisy update steps because we're not looking at the entire data set.
+42:39
+So we'll be stepping towards the center-- towards this local minimum that we're trying to reach here.
+42:47
+But each step doesn't go directly in that direction. So there's some noise in how we're progressing because we're
+42:52
+subsampling the data set. OK, cool.
+42:58
+I think to summarize, these are the main issues. And there's a pretty neat trick you can do where you just
+43:06
+basically add momentum. And you can really think of this as the same way as if you have a ball that's rolling down the hill
+43:11
+where it gains momentum. It's actually very similar to how it's modeled in terms of the physical properties. So it's a good way to gain intuition about it
+43:17
+at the very least. So you can imagine that it could help whether you have these local minimum, because if you're
+43:24
+rolling down with enough velocity, you'll be able to come out of it. If you have the saddle points or the just flat point here,
+43:31
+the model, it's been rolling down the entire hill, so it won't get stuck here anymore. It will continue.
+43:36
+Also if you have this poor conditioning value, you will still have maybe some oscillation.
+43:44
+But the nice thing is that it will accumulate speed in this direction to the because it
+43:49
+will have multiple steps that keep going that way. So it will gain faster and faster towards the center here. So it also helps with this problem.
+43:56
+Finally, it can also help average out some of the noise with the gradients because they all have a direction in common, which
+44:04
+is towards this minimum here. And so as you're computing the momentum, it builds on itself,
+44:12
+and it will converge faster because the noise is accounted
+44:18
+for by looking at the direction they all share in common, which is included in the momentum.
+44:24
+So let me show you how to actually do it, but this is the general intuition for how momentum works.
+44:31
+So we have SGD here. We have our mini batch x.
+44:37
+We're computing the gradient, which is dx. We have the learning rate or the step size, which we multiply,
+44:42
+and then we do the negative because we need to go down the hill. This gives us our new x, so this is SGD.
+44:47
+With momentum, we're now updating by this velocity term. So instead of updating by the gradient at the specific point,
+44:55
+we're updating by the velocity. And the velocity at a given time step is given by the previous velocity plus the current slope.
+45:03
+So this is how you calculate it. And you have this rho value, which is the momentum, the actual how much momentum you want to have.
+45:10
+And if you have it very high, then your new velocity is more dependent on the previous time step's velocity.
+45:16
+And this is a running average of the last gradients
+45:21
+in the momentum term here gives you how much to weight the past versus the present. So now we're updating by this.
+45:27
+And we still have this alpha, which is the step size. So it's actually a very simple change. You just are now computing the velocity,
+45:34
+which is a function of the current velocity plus our gradient. So I think I'll pause for questions here.
+45:42
+This is the explanation of momentum. And maybe I could also recap briefly how it resolves all these issues we saw.
+45:49
+So if now that you're adding momentum in over the past gradient steps, you
+45:55
+could see how it would keep continuing along this direction. And depending on your rho, if your momentum is very high, it would keep going and be able to account for a very large
+46:03
+of hump here with the local minimum. Also it's very good at these saddle points because it will just continue along the direction in which it
+46:10
+was going previously for a significant amount of time and poor conditioning. If we're having cumulatively going to the right
+46:17
+upon each step, the momentum will also be consistent there and build up. And then if we're oscillating significantly here,
+46:27
+it'll move less in the direction because the values will cancel out. In terms of the current direction and the velocity,
+46:34
+they'll be pointing the opposite direction, so it'll get minimized. So the question is, what happens if you're
+46:39
+rolling right along the saddle? I mean, I think, in practice it's very unlikely. But in that case, yeah, you would just
+46:45
+get stuck in the saddle, yeah. I think that's your initial conditions, wherever
+46:51
+you start is very unfortunate. So yeah, sometimes I guess that could happen, but it's very unlikely.
+46:56
+Yeah, and it's also why in practice people won't run a single model training run.
+47:01
+Often they'll run multiple ones with different random seeds, just in case something like that could happen.
+47:06
+Another thing is if you're doing stochastic gradient descent, you're much more likely to have, at least, a little bit of noise
+47:12
+to get you out of directly in that saddle back and forth, so I think it's basically, it never would happen because of the randomness.
+47:19
+But hypothetically, I think that could occur. Yeah. So the question is why is the saddle just an issue with SGD
+47:26
+and not optimization in general? It would also be an issue with the entire data set. It might even be more common with the entire data set.
+47:32
+So it's an issue that SGD faces, but it's also an issue that other optimization algorithms that just rely
+47:38
+on gradient descent with no bells and whistles attached would also-- they would face the same thing.
+47:44
+Yeah. Yeah. So the question is, does adding the momentum make it more difficult to converge because we'll overshoot
+47:51
+and then you'll have to come back? I think the short answer is yeah. It might not help with converging, but it will help
+47:57
+you find-- on average will help you find a better minimum point to converge to.
+48:03
+So it will converge maybe more slowly because you won't get stuck in a local minimum.
+48:08
+You would just converge here if there was no momentum versus overshooting. So I think a lot of this stuff is empirically shown where
+48:16
+it's-- it happens to be with the specific class of neural networks. The momentum does help training.
+48:21
+But this is the intuition for why we prefer it. I think, to be honest, people will use whatever works best.
+48:30
+And there are cases where people have found that stochastic gradient descent without momentum would outperform for a particular model.
+48:36
+So here's the intuition about why it could perform better. But in practice, people will just try a bunch of different ones and see what works best.
+48:43
+And I'm going over the most common ones that people try now. Yeah. But yeah, you're right. It could hurt convergence, potentially.
+48:54
+All right. I'll continue then. So yeah, I think we went through this.
+49:01
+And one other thing I wanted to point out is that there are different ways you can formulate this. So these equations are identical,
+49:07
+but you'll sometimes, depending on the implementation, see it written in different ways. But they're doing the same thing.
+49:13
+Maybe in interest of time I'll skip over why they're identical. But you could go over in the slide and prove to yourself that these are essentially
+49:20
+the same formulations. OK. I think, the next thing I'll talk about
+49:26
+is a different optimizer. So we talked about momentum. And now we'll talk about something called RMSProp.
+49:32
+So RMSProp is a bit of an older method now 2012,
+49:37
+but it came out by Geoffrey Hinton's group. And the basic idea is to, instead
+49:44
+of just having this running velocity, which the momentum captures, it's to actually add
+49:51
+element-wise scaling of the gradient. So how do we do this is we have this gradient squared term.
+50:00
+And the decay rate here is very much like the momentum term we explained before, but now it's on the squared gradient.
+50:07
+So we have this running average where we take the previous term here the gradient squared. And then we do 1 minus times.
+50:13
+And then here it is the-- literally, the gradient squared. And so this is a running average of our squared gradients.
+50:19
+So bigger values will get much bigger, smaller values will get much smaller. And if there are consistently large gradients
+50:26
+in certain values those will get very large as we continue our running average here.
+50:32
+And we're actually going to divide here. In the update step we divide by the square root of it. So the basic idea here is we're actually now stepping--
+50:39
+someone asked earlier I think there was a question-- what if we changed the direction in which we're stepping? This is exactly the type of thing you can do.
+50:46
+And this is what this is doing where we're dividing by the squared gradient term. So for values in which we have very large squared gradients,
+50:55
+for the values of W in which the derivative is very large, we'll divide by a larger value.
+51:01
+So we'll step not as far in that direction. And the more flat regions we'll step farther because we're dividing by a smaller term here.
+51:08
+So this is the basic intuition behind it. And it very much addresses one of the questions someone had earlier about can we change the way we're
+51:14
+stepping in the direction? And that's exactly what this is doing here. So you still have a learning rate, but you're dividing it by this square root
+51:20
+of the cumulative squared gradients, which gives you larger steps in the flatter areas of your loss
+51:28
+landscape and shorter steps in the very steep areas. Can anyone explain, I just gave a brief summary,
+51:33
+but what happens in this specific line here of the code?
+51:39
+What happens with our gradient step direction? How does it change? We're dividing by this value, which
+51:45
+is dependent on the current gradient and also the past gradients. When these values are very large,
+51:52
+so these are vector operations. So we have a set of derivatives here.
+51:57
+And we're dividing element-wise by another set of squared gradient values.
+52:02
+So when it's very large, the denominator is very large, then the step becomes effectively less
+52:07
+in that direction because we're dividing by a large value. And when it's a very small value the step becomes much larger, because the gradient squared term is small.
+52:15
+So it's in the denominator and we're increasing the effective step size.
+52:21
+Oh, yeah. So it's specifically for this type of example here where you have maybe a very narrow valley where
+52:28
+you want to be moving more in the flatter direction. Yes, the question is, what is a small gradient
+52:35
+mean in this context? And how does this help us move up along the steep directions less and along the flat directions
+52:43
+more? Yeah, yeah. So I think actually, this is maybe a great visual because it compares the three different approaches here.
+52:50
+So we have with momentum, which you can see it overshoots as there is a question about earlier. But then it comes back.
+52:57
+You have SGD, which is slower because it's just always moving in the fixed direction. And then you have RMSProp, which we just mentioned.
+53:04
+So the way that RMSProp works is because the gradient in the direction that I'm moving my mouse here
+53:10
+is higher, the gradient squared term is larger,
+53:15
+so we move less in that-- sorry, we move less in that direction. So you can see it actually quickly starts turning here
+53:21
+towards the center where it's a flatter landscape at this point, but it's traversing more in that direction. So we're actually changing the direction we're going based on--
+53:29
+going less in the steep direction and more in the flat direction. So These are the three. And then there's one more we'll discuss,
+53:35
+which is by far the most popular optimizer used in modern deep learning.
+53:41
+So it's just a combination of the SGD momentum and RMSProp. So here is almost what the Adam optimizer
+53:49
+is, which is the most popular optimizer in deep learning. And you also have all the prerequisite knowledge now to understand it.
+53:56
+So you look at it. And this first term here in the red is basically the momentum we described before,
+54:03
+where we have the current, so the beta 1 is the momentum term,
+54:09
+and then we have the velocity here. And we're taking a running average. The second moment here is the gradient squared term
+54:17
+for RMSProp. And we're doing the same thing here where we're multiplying the learning rate instead of by the step size
+54:24
+by the velocity. But now we're still doing the thing where we take the square root.
+54:29
+And it's the second moment here. And the reason they use first moment second moment is like a relation to physics and mechanics,
+54:35
+but it's basically just a combination of the two things we explained earlier, where you're accelerating movement
+54:41
+along the flat directions, dampening it along the steep ones, and you're also adding this notion of momentum and velocity.
+54:47
+So you gradually build up speed if you're continuously moving in the same direction. So as it's written right now, this
+54:55
+will actually run into issues at the very first time step. And it might be a little bit unclear to you why,
+55:03
+but I'll actually wait for someone to have a guess. So one thing to note is that these betas, beta1 beta2,
+55:08
+are usually initialized very close to 1, so 0.9, 0.999, and that these two values are also initialized to 0.
+55:16
+So during your first time step, if you just use this formulation of Adam you would run into potentially unwanted behavior.
+55:24
+So one of the other things is it has to do with the second moment calculation.
+55:29
+So this is the main issue here. When you calculate the second moment and then use it on the next line, you run into an issue.
+55:38
+Yeah, so the denominator is 0, basically. Yeah, that's the exact issue. So it starts at 0, so this term is 0.
+55:44
+You have a very large beta. So this value is very small. And if your gradient is not very large in your first step
+55:51
+you can have this whole term basically be very close to 0. Now, we're dividing by something very close to 0,
+55:56
+and it just creates a very large initial step, even though our gradient was small. So that's probably not something we really want.
+56:03
+And so the final thing that Adam has is it adds these bias terms here, which is specifically
+56:08
+to account for this issue where it's dependent now on the time step of training. So I think, this is also something
+56:15
+you'll go into in the homework. I just want to give the basic intuition behind Adam why the naive implementation wouldn't work,
+56:21
+which is this really large initial step. And you'll go over in the homework implementing this. And you'll see how the time step is used.
+56:28
+But the basic idea this is to account for that very large initial step. And as your time step increases, these bias terms
+56:36
+are not needed as much. OK, cool. These are some good defaults that people normally use.
+56:43
+If you're training a model with Adam, you go with these, and maybe it'll work, maybe it won't.
+56:49
+But it's a good starting point. And you can then tell from the remaining slides,
+56:54
+we'll talk about how do you know if your learning rates right. How do you know if these other values are right. So I'll speed up a little bit just in the interest of time.
+57:02
+But the basic idea is that you can see all these different optimizers converging. They all have different properties.
+57:08
+You can see how Adam is this combination of RMSProp and SGD with momentum, where it has characteristics of both, which
+57:14
+is very neat to see visually. It aligns with our intuition.
+57:20
+One final topic related to Adam is that we could look at how regularization
+57:25
+interacts with optimizer. So for example, if we have L2 regularization, how does this affect how the optimizer works?
+57:33
+And I think the answer is it's actually not immediately obvious. And you can do it in different ways. So in default Adam, they compute L2 when they're
+57:41
+computing their gradient. So we looked at the gradient and there was the loss portion of our-- so the data loss portion and then
+57:48
+the regularization loss. For Adam, it's using both of those when it computes the gradient. But AdamW basically, only looks at the data loss
+57:56
+for doing all of these moment calculations and all these steps, and it just adds the regularization term
+58:02
+at the end here. So basically, all I'm trying to describe to you all is there is flexibility for how you incorporate regularization into your optimizers.
+58:10
+Weight decay is generally when you just add it at the end, L2 regularization at the end, and you don't include it in the actual optimizer
+58:17
+for how you're calculating the velocities and momentums, et cetera. So this is the main difference. And sometimes under a lot of settings,
+58:25
+AdamW works slightly better. I think the Llama series from Meta they all use AdamW,
+58:31
+I assume because it does slightly better for them. So we have one function optimizer. Why are you splitting it into two?
+58:37
+Yeah, so if you mix it into one function, that's what Adam does. And AdamW is specifically, separating it into two.
+58:45
+So why you might want to do that is because if you don't want your velocities, your momentums to actually
+58:52
+be a function of the weights, you want it to be a function of the loss. So if you're trying to traverse your loss landscape more
+58:58
+independent of your actual weight values, that's why you might want to separate it. But you still might want a regularization term.
+59:04
+But you don't want it to interfere with the moment calculation. So this is the specific reason why they do it. Ultimately, it's empirical you try both
+59:11
+and you see which one works better. But this is why you would do it that way. OK, cool. So we'll talk about learning rates.
+59:17
+So there are different ways in which learning rates can be chosen.
+59:23
+And sometimes you'll get a very high learning rate where what will happen is basically your loss will get very large as you oscillate out
+59:30
+of the loss landscape, as we described earlier. If you have a very low learning rate, your issue is you just converge very slowly.
+59:36
+If you have a high learning rate but you're not oscillating out, but you might not be able to converge because you're
+59:42
+bumping around the local minimum, but you're not actually able to get any lower in because your learning rate is too high.
+59:48
+And ideally, a good learning rate would have this property where it causes your loss to decrease quickly over time, but then you
+59:55
+see continued improvements as you continue to train the model. In reality, actually, depending on the situation, a lot of these
+1:00:02
+could be good learning rates, and also depending on the step in training, which is the final thing we'll discuss in lecture today.
+1:00:09
+So you can actually change your learning rate as you train your model. You don't need to always have a fixed learning rate or step
+1:00:15
+size. And pretty much all modern deep learning, like all the best models coming out,
+1:00:21
+have different ways they vary the learning rate during training. So one really simple way you could do it is after a fixed
+1:00:28
+number of iterations, you just take 1/10 of the learning rate and you continue training.
+1:00:35
+So this can resolve the issue of where your learning rate is too high for you to be able to converge any further,
+1:00:42
+so then you reduce it, and you're able to get lower into the loss landscape. And this is really commonly used when training ResNets.
+1:00:48
+So that's a very popular type of convolutional neural network, which we'll discuss later in the course.
+1:00:54
+Another thing you could do is cosine learning rate decay. So this one is also extremely popular.
+1:01:00
+So here you have-- basically, this is like half of a cosine wave
+1:01:05
+where you're starting at your maximum learning rate here. And then you go down to 0 to the end.
+1:01:11
+And it follows this 1.2 cosine shape, and here's the formula for calculating it.
+1:01:17
+I won't go into too many details, but the basic idea is there's a ton of different ways to do it. When your loss uses a cosine learning rate scheduler,
+1:01:24
+you'll often see a shape like this where you get pretty good continued gains in the middle part of training.
+1:01:30
+But the basic idea is that the actual shape of your loss during training will highly depend on what scheduler you use.
+1:01:36
+So this is the basic idea I'm trying to convey. It looks very different, for example, than this one, where you can literally see where we're taking 1/10
+1:01:42
+of the learning rate during training. Another thing you do is just a linear learning rate decay.
+1:01:48
+So it just follows a straight line. You could do an inverse square root, et cetera, et cetera. There's basically, an unlimited number of ways
+1:01:54
+you could mess with your learning rate during training. And depending on the type of model you're training and depending on what works best,
+1:02:00
+you just choose the one that works best. But here are some ones you could try that could perform well in your setting.
+1:02:06
+Also a really, really popular strategy is to have a linear warm up. So instead of just starting at your maximum learning rate,
+1:02:13
+you spend a fixed number of iterations to linearly warm up to whatever your maximum value is, and then
+1:02:20
+you go about doing whatever scheduler you had afterwards. So for example linear warm up, and then this would be like the inverse square root.
+1:02:27
+Or linear warm up and then-- cosine is a very popular setup for training models.
+1:02:32
+One final thing is that there is this empirical rule of thumb
+1:02:38
+called the linear scaling hypothesis or linear scaling
+1:02:43
+law, or something like that. I forget the name. I think it's linear scaling law, where it shows that if you increase your batch
+1:02:49
+size or the number of training examples per update by n, you should also scale your learning rate by n.
+1:02:57
+So as you increase your batch size, you should increase your learning rate directly
+1:03:02
+proportionally. So I think the math behind this is a bit involved, and also it's more of an empirical rule of thumb.
+1:03:09
+So people have tried to show mathematical proofs for why this could be useful. But based on the variation of gradients in your batch
+1:03:17
+and the number of gradients you calculate per batch, et cetera, but really this is just
+1:03:23
+shown empirically to be true for a large number of problems. So this is a good rule of thumb. If you have a winning recipe but you
+1:03:28
+want to increase the batch size, then also increase your learning rate by the same amount.
+1:03:35
+Cool. And then the final thing I'll touch upon very briefly is this idea of second-order optimization, which
+1:03:44
+uses the Hessian that someone asked a question about earlier, too. So we won't talk about this very much in depth, but just to let you know this exists.
+1:03:50
+It's not something we cover in the course very much. But the basic idea is right now we're using the gradient
+1:03:56
+to form a linear approximation of basically, where's the downward direction where we're trying to traverse this loss landscape.
+1:04:03
+And we just look at the direction and we take a general step in that direction. And we added fancy things like momentum and the RMSProp
+1:04:12
+where we're decelerating along the steep directions. But this is the basic idea. We're using this gradient at each time step.
+1:04:21
+The idea of the Hessian is instead of using the gradient, you basically try to fit a quadratic or a second degree
+1:04:33
+polynomial to your function based on the derivatives at that point or the Hessians at that point.
+1:04:38
+And you then try to find the minimum this way. And in certain optimization problems
+1:04:44
+this actually works extremely well. But generally, we don't use it in deep learning because it requires two things.
+1:04:51
+So one, you have to do this Taylor series expansion, whereas right now we're just doing the first part where we're taking the derivative, but you would
+1:04:57
+need to be able to calculate the second mixed derivatives, which is already maybe difficult. And then on top of that,
+1:05:05
+this mixed derivative of all of your parameters
+1:05:10
+in your model by all the other parameters in your model can get very large as you have these many million or billion
+1:05:16
+parameter neural networks. So in practice, we don't use it because these matrices become
+1:05:24
+way too large. And so you run out of memory on your computer if you try to run it. Specifically, you're on a GPU memory.
+1:05:29
+But if you're training a smaller model or if you're OK with spending much more time to get better
+1:05:36
+steps towards your minimum, then maybe you want to look into this. Depends on the problem set, but for smaller models
+1:05:42
+this actually works quite well. But for these large neural networks we're training, we basically never do this due to the memory restrictions.
+1:05:47
+And all the time you spent computationally trying to calculate the Hessian, et cetera, you would rather just see more data during training.
+1:05:58
+All right. So some, I guess, concluding thoughts for you
+1:06:03
+all that can be useful. So Adam or AdamW is a really good default choice for training your first model if you're working on a new problem.
+1:06:11
+In a domain, I would recommend it. And it could even work OK, even if you do constant learning rate.
+1:06:16
+So usually people will try Adam AdamW with constant learning rate or with a linear warm up, and then a cosine decay those are like a really popular combination.
+1:06:25
+Also, I think, SGD and momentum can sometimes outperform Adam. But the tricky thing is because you generally
+1:06:34
+have to tune the values more, so you have to try many more learning rates because you
+1:06:40
+don't have this RMSProp term to account for the steep directions. And also you might have to try different scheduling values,
+1:06:46
+whereas in practice, Adam's best by test. People have tried it a bunch of different domains and it works very well. It's very adaptive to the loss landscape.
+1:06:55
+If you're doing a full-batch update where you're already, at each step, you can fit basically, your entire training set into your batch size,
+1:07:03
+you might want to look beyond first-order optimization into second-order and beyond, because it seems like your data
+1:07:09
+set's not very large, or maybe your model is not very large, and you could potentially, benefit from having these non-linear update steps
+1:07:17
+and computing more sophisticated strategies for going down trying to find the minimum here.
+1:07:25
+Yeah, so I think we're essentially done with the lecture. I'll give some slides about looking forward.
+1:07:31
+So how do we optimize more complex functions than linear models, which is what we covered in this lecture?
+1:07:37
+And next lecture specifically, we'll be looking at neural networks, which is very exciting topic.
+1:07:44
+A neural network, the we'll discuss in class, is basically, you have two of these weight matrices
+1:07:49
+now, one for each layer. And you have something called a non-linearity sort of stuck
+1:07:55
+between. So in this case, the most common-- sorry, not the most common, but the most simple one is just this ReLU function, which you'll learn about more.
+1:08:03
+But the basic idea is now we have two weight matrices, and we have this additional function that's done in between the weight matrix calculations.
+1:08:11
+This is nice because, as I said, it's nonlinear. So if we're trying to build a linear classifier to classify
+1:08:16
+data like this, you'll run into an issue where the blue points and the red points are not linearly separable.
+1:08:22
+But maybe there's some transformations we can do or through many layers of a model, we can eventually transform the data
+1:08:28
+into a way in which it is separable by a line, which would be our then final layer of the model.
+1:08:33
+[AUDIO LOGO]

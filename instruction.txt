@@ -1,4 +1,4 @@
-The transcript has been pasted below. It is from https://www.youtube.com/watch?v=pdqofxJeBN8&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=2
+The transcript has been pasted below. It is from https://www.youtube.com/watch?v=dyNGd06MWn4&list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16&index=3
 Your task is to create a **well-structured Jupyter Notebook (`.ipynb`)** that serves as a **complete standalone study note** for this lecture.
 
 The notebook should be designed so that:
