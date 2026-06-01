@@ -1,0 +1,2125 @@
+Today we're going to be talking about
+image classification with CNN's. So you
+might be wondering who am I? Um I'm a
+new face. You haven't seen me before in
+this class. I'm Justin. I'm the fourth
+mystery instructor in this class. I
+think my picture's been on the website,
+but it's my first time here today. Um
+and a little about me. Um I did my PhD
+here at Stanford from 2012 to 2018. uh
+working with FE on deep learning,
+computer vision, pretty much all tasks
+in computer vision around that time. Um
+during my time here at Stanford, I was
+uh lucky enough to initiate CS231N with
+Andre and Feay and others uh and teach
+it you know quite a few times 2015, 16,
+17 and 18 and 19 um at Stanford. After
+that I spent time at uh Facebook AI
+research doing all kinds of deep
+learning computer vision stuff there. Um
+and being I was a faculty member at
+University of Michigan. Um and there I
+taught basically the same class a couple
+more times. So I've taught this class a
+couple times but it's been a while since
+I've been here. Um and most recently
+I've been doing a startup called World
+Labs with FE. Um and that's just a
+little bit about me.
+Now about where we are on this class. So
+we're kind of at an interesting point in
+the class right now. um where the class
+is kind of divided up into these couple
+different segments. Um and we basically
+finished the first segment. The first
+segment is basically around deep
+learning basics. And this is really cool
+because now all the stuff that you've
+seen in like four lectures is basically
+all the fundamentals of deep learning.
+You basically know this whole pipeline
+of what is the basic pieces that go into
+building a deep learning system. So I
+thought it's useful here at the
+beginning of this inflection point to
+just sort of step back and recap some of
+the major themes that we've seen in the
+first bit of the course. Um so the first
+is this idea of image classification
+with linear classifiers. Um and this was
+kind of meant as a toy problem to give
+you a sense of a kind of problem you
+might solve with deep learning where
+usually the first step in solving a deep
+learning problem is to define your
+problem in a way where it is um you take
+input some grid of numbers some tensors.
+You produce as output some tensors and
+you want to formalize this problem as
+some input output of tensors. Um, and we
+kind of do that in the image
+classification setting by saying that we
+want to classify images into a bunch of
+human understandable categories. The
+inputs are going going to be these grids
+of pixel values which are arranged in
+threedimensional tensors. The outputs
+are going to be scores giving us the
+affinity or the the degree to which we
+have one score per category. You define
+a set of categories in advance and the
+network is supposed to predict high
+scores for categories that the image is
+likely to be low scores for the
+categories that the image is likely to
+be not. Um and then we can define we can
+set up a a problem to you know uh use a
+weight matrix uh multiply that against
+the the image pixels and predict these
+scores. Um and we saw that there's a
+couple different viewpoints a couple
+different ways that we can interpret
+these linear classifiers. Um and this
+basically sets up a functional form
+saying that we can predict scores for
+images if only we have a weight matrix
+W. So then the question is how do we
+select a good weight matrix W? And for
+that we go to loss functions. Right? So
+loss functions are these things that
+tell us you know given a particular
+value of a weight matrix given a
+particular data set how well does this
+weight matrix fit the solve the problem
+on this data set. Um and in particular
+we saw some examples of loss functions
+that are commonly used for
+classification problems including the
+softmax loss and probably the SVM loss
+as well. Um and then now okay so now
+we've kind of gotten a little bit
+further along in our problem. We've set
+up the problem of image classification.
+um we have a model for solving that
+problem using linear classifiers. We
+have a way to tell if our solutions are
+good using a loss function. But now we
+actually need to search for a good
+solution in that space. And that's where
+optimization comes in. Right? So now
+that we now you think of the now you
+think of defining this optimization
+landscape where on the x-axis or on the
+on the horizontal plane are all the
+different possible settings of your
+weight matrix. And then the loss
+function is basically a height of this
+plane where a high loss function is bad
+because losing things is bad. So you
+want low loss. So the purpose of
+optimization is to somehow traverse this
+space, slide down this manifold and find
+a point at the bottom of very low loss.
+And now each point in this space
+corresponds to a weight matrix. So by
+sliding down that space, we're going to
+find a good weight matrix that solves
+our problem um and gives us a good
+solution to our task. And in particular,
+we saw a couple different commonly used
+optimization algorithms that are used in
+deep learning pipelines. uh stochastic
+gradient descent usually with momentum
+RMS prop atom um and one sort of
+interesting uh topical note is that
+right now um one of the biggest uh deep
+learning research conferences is I clear
+international conference on learning
+representations um and just yesterday uh
+iclear 2025 gave their test of time
+award to the atom paper um because the
+paper that introduced this atom
+optimizer was published at iclear uh 10
+years ago in 2015 um so at a lot of
+academic conferences we'll they'll tend
+to give test of time awards to some of
+the most impactful papers from 10 years
+ago. Um, and just yesterday the atom
+optimizer that you guys have been learn
+that you guys saw in this class got this
+very prestigious test of time award at
+iClar 2025. So I thought that was pretty
+cool and a nice uh sort of way to
+connect what you've been learning to
+stuff that's happening right now in the
+machine learning community.
+Okay. So then now that we now we
+basically at this point we've got we've
+got our linear classifiers, we've got
+our loss functions, we can optimize
+them. Now we're almost good to go. Um
+but we ran into a problem is that the
+linear classifiers that we started with
+are actually not very powerful. Um and
+we saw this from we we saw two different
+ways of attacking this this uh this
+deficiency in linear classifiers. One
+was from the visual viewpoint where you
+can interpret a linear classifier by
+thinking about by thinking of that
+learned weight matrix as an image where
+you learn one image template for each of
+the categories that you're trying to
+that you're trying to classify against.
+Um, and if you think about it that way,
+we realize that the weights of your
+linear classifier, each row of that
+weight matrix is one template. So the so
+the linear classifier basically needs to
+summarize all of its knowledge about
+each category into just one template.
+And that's kind of a difficult that's
+just not a very powerful classifier. Um,
+so then you can this kind of shows up in
+these visualized templates of a learned
+linear classifier where you can see that
+for for categories like um the car, this
+car kind of looks like a red blob, but
+cars don't have to be red, right? What
+if your car was blue or purple or green
+or something else? There's just no good
+way for a linear classifier to caption
+this cap capture this notion of there
+might be different appearances for an
+object for each category. Um or from the
+geometric viewpoint, if we imagine these
+these each point of our data set as some
+point in highdimensional space, then a
+linear classifier is basically going in
+and carving up that space with
+hyperplanes. Um, so that's really good
+if all your categories actually do lie
+in linearly separable regions of your
+space, but there's no reason to expect
+that to be true in general. So these are
+both two big deficiencies that we ran
+into when looking at these linear
+classifiers um as applied to image
+classification problems.
+And that led us in in that led us to
+define this notion of neural networks
+where we're going to generalize our
+linear classifiers um to no longer just
+have one weight matrix, but instead
+stack two weight matrices on top of each
+other um with a nonlinearity in between
+them. And now this gives us a much more
+powerful mechanism for predicting scores
+from our inputs. Now the now basically
+the problem is still the same. We have
+our input pixels going through this uh
+this computation spitting out scores.
+But now rather than computing but we
+just basically selected a different
+functional form for this score function.
+Um and this gave us and now you know the
+algebra is pretty simple. You just need
+to go from f= wx. You add an extra w2
+add a little nonlinearity in between. So
+the algebra doesn't change very much,
+but in doing so, your classifiers get
+much much more powerful than they were
+before. Um, but now things get a little
+bit complicated again because how does
+this play into optimization, right? We
+know that if we have a loss function, if
+we have a model, then we want to find
+values of those weight matrix that cause
+the loss to go down. And and to do that,
+we need to compute gradients. We need to
+be able to compute gradients of the loss
+with respect to all the parameters of
+our model. And that's this notion of a
+computational graph. So these
+computational graphs are basically a
+data structure to organize the
+computation of a neural network where
+each node in the graph is a little
+functional primitive like a matrix
+multiply or a ru or some other something
+else like that and then data flows
+forward in this graph from left to right
+from our inputs and our weights on the
+left flowing through all these
+intermediate nodes in the graph to spit
+out the loss function on the right. Um
+and then once we compute the loss, you
+you traverse this lo this uh this graph
+backwards from right to left to compute
+gradients of that loss with respect to
+all the nodes of the of the of the of
+the graph inside the network. Um, and
+this is now really cool because it
+basically means that we can write down
+these arbitrarily complicated neural
+networks, these arbitrarily complicated
+expressions for computing our our
+outputs from our inputs, but we now have
+an automate a nearly automated algorithm
+for computing whatever gradients we want
+through arbitrarily complex neural
+networks. Um, and the way that we do
+that is this magic of back propagation.
+Um, and back propagation is really cool.
+I think it's one of the algorithms that
+makes deep learning work because it
+makes it takes this global problem of
+how do we compute the loss through this
+computational graph and converts it into
+a local problem and now each of these
+nodes don't doesn't need to know
+anything about the larger context of
+what is the graph I'm living in what is
+the problem I'm trying to solve we just
+need to be able to define these little
+nodes inside of our computational graph
+that on the forward pass know how know
+how to compute outputs from their inputs
+and then on the backwards pass can
+receive gradients coming upstream. It
+doesn't have to care where those
+gradients come from. What what was what
+was causing those gradients to happen.
+And I just need to compute gradients
+downstream gradients with respect to my
+inputs given my upstream gradients. And
+again, this is so powerful because now
+it gives us this mechanism where we can
+just define a bunch of different types
+of nodes um that all just have follow
+this local API of computing outputs,
+computing local gradients. And if we as
+long as we follow that API for all of
+the nodes, then we can start to stitch
+them together into these big complicated
+computational graphs that can do
+basically arbitrary computation. And the
+gradients just come for free when we
+turn the crank on the back propagation
+algorithm.
+Um and u you know this is this slide you
+know that you guys saw last time is
+basically back propagation on uh on
+scalar values but we can generalize this
+to work on vector value on vector valued
+or matrix or tensor valued values as
+well. Um but the basic thing to remember
+is that your inputs are some tensors,
+your outputs are some tensors. And now
+your your upstream gradient that you get
+is the gradient of the loss with respect
+to your outputs. Um and that always has
+the same shape as your outputs, right?
+Because the loss is a scalar. A gradient
+of a loss with respect to a tensor says
+for each element in a tensor, if I were
+to wiggle that element a little bit,
+then how much does the loss wiggle,
+right? And because the loss is a scalar,
+we just need to wiggle each of those. we
+just need to imagine wiggling each
+element in our tensor independently. Um,
+and that is the definition of our
+gradient. So then that's very easy to
+remember. Your upstream gradients always
+have the exact same shape as your
+outputs. Your downstream gradients,
+those are the gradients with respect to
+my inputs. Those also have the same
+shape as my inputs. Right? So then the
+back propagation algorithm is basically
+just the chain rule where I need to
+somehow compute my downstream gradients
+as a function of my upstream gradients
+and whatever function I was trying to
+compute. um and you'll get some practice
+on later assignments computing uh you
+know writing down the gradient
+expressions for different kinds of
+operators uh in in your neural networks.
+So basically this gives us our recipe
+for solving pretty much any problem in
+deep learning, right? Like this this was
+intended to be quite a bit more general
+than just image classification or just
+linear classifiers or just fully
+connected networks. Right now if you
+have any kind of problem that you want
+to solve, you just need to encode it as
+tensors. Write down some computational
+graph that computes your output tensors
+from your input tensors. Collect a data
+set of input output tensors. Write down
+a loss function for the kind of problem
+you want to solve. Now, and then
+optimize that loss function using
+gradient descent, using back
+propagation. Um, and that's a really
+powerful recipe that basically powers
+all deep learning applications, whe
+whether it's image classification, image
+generation, large language models,
+pretty much anything involving a neural
+neural network is trained using this
+using this formula or some slight
+variant on top of this formula. So that
+leads us to the second part of the
+class, which is perceiving and
+understanding the visual world. So here
+is where we want to get a little bit
+more specialized and start talking about
+you know not the general framework of
+deep learning but how does this apply to
+to problems that we want to solve in
+computer vision processing images doing
+interesting stuff with images. Um and
+today we'll take a step towards that by
+talking about a bit more about
+convolutional networks. Um so
+convolutional networks actually are a
+pretty small lift on top of this
+framework that we've already already
+defined. Right? So we've already talked
+about two right we have this you have
+this sort of general paradigm of
+computational graphs of little operators
+that can live inside of our
+computational graphs but we so we have
+this beautiful framework but we actually
+haven't filled in a lot of the specifics
+of that framework. We've actually only
+seen like two or three different kinds
+of nodes that can live inside of our
+computational graphs. We've seen fully
+connected layers which are which is
+basically a matrix multiply. We've seen
+activation functions like our ReLU and
+we've seen our loss functions themselves
+and um in you know now to build up from
+what we've seen already into
+convolutional networks basically all we
+need to do is add a couple new types of
+nodes um that can fit into our
+computational graphs. Um, and in
+particular, there's really only two
+operators that we need to talk about to
+build much more powerful networks, which
+will be the convolution layer that we'll
+spend most of today's lecture talking
+about. Um, and then the pooling layer,
+which is um, another thing that we often
+use when processing images.
+So, that's kind of the road map for
+today. I want to talk a little bit about
+convolutional networks in general. Then,
+we'll talk about these two particular
+um, computational primitives that we can
+use to build convolutional networks in
+our computational graphs.
+Okay, so we've already talked about im
+so then here we want to step back a
+little bit and think about this problem
+of image classification again. So we've
+already talked about how image
+classification is this super core
+problem in computer vision where we want
+to take an input image and then predict
+you know from that input image what what
+is in this image as a set of category uh
+you know predict one of k category
+labels basically um in this image
+obviously is a cat so we want to predict
+the cat classifier um and most of the
+and you know we basically solved this
+problem in some sense already by
+building linear classifiers and by
+building uh fully connected multi-layer
+perceptron neural networks um but these
+these uh these networks are basically
+operating in pixel space um they their
+inputs you know remember we said the
+first way to the first step to solving a
+deep learning problem is to formulate it
+in terms of input output tensors well in
+this case our input tensors were the raw
+pixel values of our images um so when we
+write f ofx= wx that x input that's just
+the literal values of all of our pixels
+um and then we go from those raw pixel
+values to our class scores um but
+there's another way to do it which was
+common back in the dark ages before
+neural networks came about and saved us
+from all this tedium um maybe back in
+the early 2000s sort of up until maybe
+2010 2011-ish was this idea of feature
+representations. So here the idea is we
+could actually um you can actually
+choose what is going to be your input to
+your neural network. So you could have
+said rather than feeding the raw pixel
+values of the network of the image into
+our neural network instead we could
+define some other kind of function which
+is going to extract features extract
+some convert those pixel values of our
+image into some other meaningful
+representation that we as the
+intelligent human designers of this
+system believe represent or capture some
+of the important facets of our input
+image. Um so then when if you're doing
+you know image classification on top of
+a feature representation your step one
+would be to define a feature
+representation that converts your um
+your raw image pixels into this higher
+level representation. And now that
+feature representation will now take the
+will now be the X that feeds into your
+linear classifier. Um, and there was a
+ton of work in computer vision, uh, you
+know, really in the 2000s to the late
+2010s or to the early 2010sish that were
+that used this idea of feature
+representations for all kinds of CL for
+all kinds of tasks. Um, and I don't
+really think it's useful to go into
+super great detail on any of these
+particular feature representations
+because spoiler alert, they got
+deprecated like 10 years ago. Um, but
+it's useful to have a a flavor for what
+they might have looked like. So one
+example of a kind of feature
+representation that people sometimes
+used is this notion of a color
+histogram. So here what we could say is
+divide the space. So maybe we we we
+think that somehow the distribution of
+colors in our image might be a useful
+thing for a classifier to look at or
+care about, right? Because maybe you're
+building a fruit detector, apple
+detector, and you want to know if it's
+ripe or not. Maybe a maybe a red apple
+from a green apple. you know how knowing
+how much red or green is in the image
+might be something that we as humans
+think is useful for the network to know
+for for making its classifications. So
+here uh we could build we could try to
+build a feature representation that
+captures that intuition. So here what we
+might do is take the space of all
+possible colors, discretise that space
+into some set of buckets and now for
+every pixel in our image, we map that
+pixel to one of the discrete buckets in
+our color space and then basically our
+feature representation becomes something
+like a count of how many pixels in the
+image fall into this color bucket. Um
+and now you could and now this this is
+kind of an interesting representation
+because it destroys all the spatial
+structure of the image and it only talks
+about the color distributions. So now
+you know if you had red in the corner
+versus red on the other side they would
+those two images would look the same to
+this color histogram features um but
+they would look very different from the
+raw on the raw pixel perspective. So the
+color histogram is a kind of one basic
+kind of feature extractor or feature
+representation that you can build on
+images that basically looks only at
+color and does not look at spatial
+structure at all. Um another category of
+um feature representations that people
+used to look at is sort of the con is
+sort of the sort of dual to that in
+which are these histogram of oriented
+gradients and I don't think it's useful
+to talk too much about exactly how these
+are computed but the intuition of these
+is that they basically throw away the
+color information and they only look at
+the structure information they basically
+want to look for every point in the
+image what are like what direction like
+what is the local direction of the edges
+in the image around that local region so
+here you can see that this frog you know
+the leaves of the frog frog, it kind of
+extracts diagonal type of features
+because it corresponds to these diagonal
+structures over here. Um, or around the
+frog's eyes, you can see, oh, it sort of
+captured those those those spherical
+those circular structures. So, again,
+it's not super useful to see how this is
+computed, but it's useful to know that
+these are the kinds of features that
+people would uh designed for images
+maybe a decade or decade and a half ago.
+Um, and people combined these in all
+kinds of complicated ways. So, people
+would often you might wonder, oh, what's
+the best feature representation? The
+usual answer was just stack them all
+together. So a pretty common approach
+would be to have a bunch of different
+feature representations um extract them
+all from your image and then concatenate
+them all into one big feature vector. Um
+and that's kind of becomes your feature
+representation for your image. Um and
+now you could imagine once we have this
+feature representation, we can basically
+stick whatever kind of classifier we
+want on top of it. Um and this and it's
+interesting to then take a step back and
+contrast that picture, that viewpoint of
+that whole system, you know. So system A
+is thinking about a feature feature
+extractor plus learned network or
+learned linear classifier on top of your
+features. And then system B is endto-end
+neural networks. And it's they actually
+don't look that different if you take a
+step back and think about it in the
+right way. Both of these systems are
+ultimately inputting the raw pixels of
+the image and outputting some scores or
+predictions about the image. Um the
+difference is that the is the difference
+is which part of the system is designed
+by humans versus which part is learned
+via gradient descent. In the feature
+extraction plus linear classifier
+paradigm the feature extraction portion
+of the system is designed that could be
+a bunch of really hairy C code or hairy
+mat lab code. Um and you don't want to
+think about the details of what's going
+on inside of that. Um and then just the
+part that you're learning via gradient
+descent the part that you're learning
+from your training data is just that
+classifier on top of the feature
+extractor. Whereas the neural network
+approach is basically saying gradient
+descent is probably a better programmer
+than you and lots of data probably knows
+more about your problem than you do. So
+the then the intuition of these neural
+network classifiers is there's still
+ultimately going to be a system that
+inputs the raw pixel values and spits
+out your classification scores at the
+end. But the difference is that all
+parts of that system from the raw pixels
+all the way to the final classification
+scores will be tuned via gradient
+descent and will be learned from your
+training data set. So the intuition is
+that you know there might be in this
+feature extraction paradigm there might
+be some bottlenecks. You as a human
+might get something wrong. You might
+have wrong intuition about what parts of
+the problem are important what things
+are not important or it might be really
+hard for you to write down the right the
+perfect feature extractor that solves
+your problem. Um and this endto-end
+learning approach of comnets and really
+of deep learning more generally is just
+saying that data and compute can likely
+solve that problem better than you as a
+human designer can. Um and this is and
+this b this paradigm has basically won
+over over the past decade and a half for
+lots and lots of problems repeatedly.
+Okay. So that that kind of gives an
+intuition of so that so then the
+question is like for the particular
+problem of images um how should we
+design these endto-end systems right
+like it's not going to be a fully
+connected network all the way that would
+be a little bit silly. We do need to
+still put a little bit of design into
+the system, right? But the difference
+about designing a neural network versus
+designing a feature extractor is that in
+designing a neural network, you're not
+designing a particular function of a
+feature extractor. You're kind of
+defining a whole category of functions
+where the category of functions is
+defined by the structure of your
+computational graph um by the by the
+sequence of operators that get run. But
+the but there's a little bit of but
+there's some flexibility in that system
+because you're leaving the weights of
+the system free to be learned from data.
+But the role of the human designer still
+matters. You still need to decide what
+is that architecture of your network.
+What is that sequence of operators that
+get stitched into a computational graph?
+What are the sizes of all the matrices
+involved at every stage of processing.
+So there still is a lot of role for the
+human to design parts of the problem um
+in this deep learning era. Um but the
+the that like what you're designing is a
+little bit different.
+So this is basically where we start to
+see the deficiencies in the tools that
+we have so far for solving this problem,
+right? because we see that we've we
+we've seen linear layers. We've seen
+fully connected networks. Um and the
+kind of only neural network architecture
+that we've seen is to flatten our pixels
+of our image into a big vector. Do
+matrix multiply, do RLU, do more matrix
+multiply, do more RLU, and that's about
+it. That's all we know how to do at this
+point. Um and one big problem with that
+is that it destroys the spatial
+structure of the images. Um there's this
+big problem, right? Like it's sort of
+like images are actually not
+one-dimensional objects. Images are
+two-dimensional. They have two
+dimensional structure. That
+two-dimensional structure matters for
+the content of those images. And when
+you build a linear classifier on raw
+pixels by stretching it out into a big
+vector, you're basically ignoring that
+important factor of your input data in
+the design of your neural network
+architecture. So when we think about
+designing neural network architectures
+for images in particular, we want to
+think what are other what are other
+designs for our network? What are other
+computational primitives we can slot
+into our computational graphs that
+better that better respect um that
+two-dimensional structure of images?
+And that leads us to convolutional
+networks, right? So convolutional
+networks are basically a category of
+neural network architectures that are
+built of linear layers, non
+nonlinearities, convolution layers,
+pooling layers, sometimes a couple
+others um that stitch together into
+these neural network architectures that
+input raw pixel values and then output
+some kind of prediction or scores for
+our uh for our images. And the general
+structure of these is that usually
+they'll they'll have some prefix some
+body of the network which is some
+interled sequence of convolution layers
+pooling layers and nonlinearities that
+can be thought of of do as extracting
+some useful feature representation for
+the image. And then on top of that
+there'll usually be some kind of fully
+connected layers sometimes as few as one
+um but sometimes more than one which you
+can think of as a multi-layer perceptron
+fully connected network classifier that
+lives on top of and ingests the features
+from the convolutional portion of the
+network. But crucially this whole system
+is tuned end to end um via gradient
+descent by minimizing the loss on your
+training data set. And these networks
+actually have quite a bit of long
+history. So um these this this image
+this particular combinant architecture
+that we've drawn on the screen actually
+comes from a paper back in 1998 um with
+Yan Lakun Leon Bau uh and others who
+were at the time building these
+convolutional neural networks all the
+way back in 1998 to perform the task of
+digit classification um and it actually
+worked pretty well but it was really
+expensive they didn't have GPUs they
+didn't have TPUs they didn't have the
+the kind of compute resources that we
+did today but the underlying algorithm
+the underlying network architecture
+basically looks pretty similar in 1998
+um to what things were you to to the
+kinds of architectures that people were
+using well into the 2010s
+and then zooming forward from 1998 up
+until 2012 um that's when the alexnet
+architecture came out and this was kind
+of a a big boom like giant explosion of
+deep learning especially in computer
+vision and I think we talked about this
+in some earlier lectures um but the
+alexnet architecture again like doesn't
+look that different from this yanlun
+lenat architecture from 1998 it's a
+bunch of convolutional layers fully
+connected layers. It's bigger. There's
+more layers. The layers have more units
+in them. Um but it's still trained end
+to end with back propagation to minimize
+some fairly simple loss functions. Um
+but here like Alexet was when really
+things started to take off and at this
+time they were able to train on GPUs,
+GPUs were available um there was more
+data available because of internet
+because of imageet. So that's the so
+Alexet is when things really started to
+take off. Um so then the era from I
+think about 2012 to around 2020ish was
+an era where convolutional networks were
+basically dominating almost every
+problem in computer vision. Um they were
+sol like basically anything you any kind
+of a problem that you wanted to do with
+an image. Um in that era it was almost
+certainly going to be a comnet that had
+the best performance on that problem. So
+this this included tasks like detection
+on the left um which is the task of not
+just classifying an image but drawing a
+box around um all the objects in the
+image and putting a category label on
+the box. Segmentation is the task of
+assigning labels not at the box level or
+the image level but instead assigning
+labels at the pixel level. So now we
+want to assign a category label to every
+pixel independently in our image. Um and
+we'll talk more about architectures for
+these problems in future lectures. But
+you know these are sol these can be
+solved very effectively using
+convolutional networks.
+People used comments for other kinds of
+problems involving language as well. So
+the task of image captioning where we
+want to predict a a natural language
+caption from an image. Uh the some of
+the first widely successful approaches
+to this problem also were built on
+convolutional networks. Um and then even
+for even for some more recent tasks of
+generative modeling, right? So text to
+image text to image uh sorry captioning
+is basically the problem of image to
+text where we input an image and then
+want to output a natural language
+sentence describing the image. We can
+also think about the inverse problem of
+text to image generation where we want
+to in input a natural language
+description of something that we're
+imagining in our head and have the
+system generate a new image from scratch
+that you know hopefully matches our
+input description. Um and some of the
+really some of the first really widely
+successful uh widely successful versions
+of this problem also were built on
+convolutional networks. So this uh this
+particular figure is from the stable
+diffusion paper that came out back in
+2021. Um and this you know this has got
+this technology has gotten a lot better
+in the last couple years and we'll talk
+more about that in some later lectures.
+But it's useful to point out that this
+basically the the first versions of this
+that started to work really well were
+also built on convolutional networks. So
+basically convolutional networks were so
+important for this history of computer
+vision that the initial version of this
+class that we started way back in 2015
+was actually called um convolutional
+neural networks for visual recognition
+because at the time convolutional
+networks was basically synonymous with
+computer vision. Um and computer vision
+was basically the the biggest the
+biggest field that was benefiting from
+deep learning at that time. So in in
+setting out to teach a class about deep
+learning, it actually made a lot of
+sense to focus entirely on the problem
+of convolutional networks for image
+problems. Um and that's basically the
+inception of this class 10 years ago. Um
+but the field has actually evolved a lot
+since then, right? Convolutional
+networks have actually gotten replaced.
+Visual recognition, there's a lot of
+other interesting problems that we can
+solve now. So you'll notice that the
+name of the class changed at some point
+along the way um and to no longer focus
+so specifically on on neural on
+convolutional networks. And the reason
+for that is that you know I said this
+was the era from 2012 to 2020. You might
+be wondering what happened in 2020 other
+than co that could have displaced
+convolutional networks. Um it wasn't co
+it was transformers. Right? So
+transformers are this alternate neural
+network architecture that we'll talk
+about in a couple more lectures. Um but
+basically they started off in natural
+language processing for processing uh
+documents for processing text strings.
+Um, and the transformer architecture got
+first published in 2017 and for a couple
+years after that it mainly stayed in the
+regime of processing text. But there was
+a really important paper in 2021 that
+basically applied nearly the exact same
+transformer architecture that had been
+getting used to process text to process
+strings and instead used it to process
+images in nearly the exact same way. Um,
+and since then people have found that in
+a for a lot of the previous problems
+that we just talked about that were
+previously solved using convolutional
+networks. You could replace the CNN with
+a transformer, keep everything else the
+same and the problem and you tend to get
+better performance on these problems.
+They they scale up to more data, they
+scale up to more compute. Um, and you
+know this is a then we can get more we
+can get more data, we can get more
+compute. Um, so that so these are much
+more commonly used for more and more
+computer vision problems these days.
+Um, and we'll talk much more about
+transformers in lecture 8, but I thought
+it would be weird to be pitching comnets
+super hard when actually they don't get
+used quite as much nowadays as they did
+maybe 5 years ago. But I still think
+it's really useful to talk about
+convolutional networks. Um, one because
+there is a lot of historical
+significance. Two, these uh these these
+algorithms still do get used quite a lot
+in practice. Um, three, it helps you
+build intuitions about what's important
+for images. Um, and four, they're
+actually not completely dead, right?
+Like a lot of times we're actually
+building hybrid systems. Sometimes we
+use convolutions, sometimes we use
+transformers, sometimes we mix them
+together in various ways. So it's
+actually super useful to still know
+about this stuff.
+So then basically um the rest of today
+we're going to talk more about
+convolutional networks. We said that we
+already we said that a convolutional
+network is just a computational graph
+for processing images that's built from
+a couple different primitives. We've
+already met the fully connected layer
+and the activation function. So we
+basically need to walk through these two
+more layers of the convolution layer and
+the pooling layer. Quick recap of the
+fully connected layer. This is what
+we've already talked about in the
+context of linear classifiers. So with
+our fully connected layer, like we said,
+basically what we do is we take our
+pixels of our image. Our image is this
+three-dimensional tensor. 3 32x 32x3.
+32x 32 are these two spatial dimensions.
+3 are three channel dimensions for your
+RGB colors. So we take the that 32x 32x3
+vector. You stretch it out into a long
+vector of 3072 cuz that's you know if
+you multiply those in your head, that's
+the number you get. Um and then you have
+this basically this vector of 372 3072
+numbers. Um we have a weight matrix
+that's 3072 by 10 in this case because
+10 is the number of output classes that
+we want. You do a matrix vector multiply
+between those two you end up with with a
+vector of 10 numbers giving us our class
+score. Um and in particular it's
+interest like in trying to generalize
+this from fully connected layers to
+convolutional layers. It's useful to
+think a little bit more about the
+structure of what this fully connected
+layer is doing. Right? that fully
+connected layer. Um the output vector
+contains 10 elements. Each one of those
+elements is a single number. Each one of
+those numbers is predicted by computing
+an inner product between one of the rows
+of your weight matrix and the entire
+input vector. Right? But each each entry
+you should basically think of as a dot
+productduct. And a dot productduct you
+should basically think about as a
+template match. Right? Because the dot
+productduct between two vectors is high
+when the two vectors point the same way
+and it's zero when the two vectors are
+orthogonal. So anything built on dot
+productducts is basically a kind of
+template matching. So what the way that
+you should think about these fully
+connected layers is that we have a set
+of templates. Each of the templates has
+the same size as our input. Um and then
+the output is the template matching
+score between each one of our templates
+and the entire input. So then once we
+think about it that way, there's
+actually a nice way we can generalize
+this from fully connected layers into
+convolutional layers. And that's by
+saying, you know, we're still going to
+have this notion of template matching.
+We're still going to have this notion of
+learning a bank of filters, but what
+we're going to change is that those
+filters will those those templates are
+no longer going to have the same shape
+as the input. Instead, now our fil now
+our filters will have a will only look
+at a small subset of the input. So, more
+concretely, um, rather than stretching
+out our image into a big vector of 372
+numbers, instead we're going to maintain
+the 3D spatial structure of of our
+image. It's going to now be a
+three-dimensional tensor um of three
+channels, sometimes called depth or
+channels dimension. Um 32 width, 32
+height. And now one of our filters is
+going to be a tiny little sub image, a
+tiny lowresolution image, in this case a
+5x5 pixel image. Um and importantly that
+that that small filter needs to have
+three channels. The channels are always
+going to span the same as the number of
+channels in the input, but the spatial
+size will be smaller. And now what we're
+going to do is we're going to comput
+dotproducts. We think about that small
+filter as a little chunk of image
+template and we're going to slide it
+everywhere across the image and and say
+for every point in the image, how much
+does that sub portion subport subp part
+of the image match this template that
+we're learning in our convolutional
+filter. So we'll plop that convolutional
+filter down at some chunk of the image.
+That 5x5x3 filter will line up with some
+5x5x3 chunk of the image at that spatial
+location. We'll comput an inner product
+between those two. And that will give us
+one single scalar number telling us how
+much does that chunk of the image align
+with our template. And now we'll repeat
+that process and slide that template
+everywhere in our image. And every place
+that we plop down that template, it'll
+give us we'll again compute this
+template matching score that says how
+much does that piece of image align with
+that one template. And as we slide that
+filter everywhere on the input image,
+we're going to collect all of those
+scores, all of those template matching
+scores into a plane, right? And that
+plane will now be a two-dimensional a
+two-dimensional plane that says
+basically for every point in the every
+point in the plane now corresponds to
+how much did that corresponding piece of
+the input image align with our filter.
+Um, but of course um this is deep
+learning. We want a lot of compute and
+how do we get more compute? we have more
+filters. So now we'll we'll add a second
+filter and we'll say rather we'll we'll
+repeat the whole process again um with
+another filter. So we'll have we we'll
+go to go we had the a 5x5x3 filter that
+we colored in blue. Um now let's imagine
+a second filter that's now colored in
+green. Our second filter will still be
+5x 5x3 and we'll repeat the exact same
+procedure of sliding that green filter
+everywhere on the image. um compute
+template matching scores between the
+green filter and little sub pieces of
+the image and then collect all of those
+scores in a second plane telling us you
+know for every point in the image how
+much did it respond to the green filter
+and now we can com and now we can
+basically um iterate this and and add as
+many filters as we want. Um so then in
+this case we are drawing six filters um
+each of them is going to be 3x 5x 5 or
+3x so yeah 3x 5x 5. So then we can
+actually collect all of those filters
+into a single four-dimensional tensor.
+Right? So that four-dimensional tensor
+now has six as a leading dimension
+because we have six filters. And then
+that 3x 5x5 is that image template. It
+is that chunk is that template um that
+we're learning. And now the convolution
+layer basically takes as input our
+three-dimensional input our
+three-dimensional image and our
+four-dimensional bank of filters slides
+slides all the filters everywhere in the
+image and gives us these response
+planes. So then once we collect all
+those response planes and stack them up
+in a third dimension then our output has
+um has size 6x 28x 28 where 28x 28
+should be interpreted as spatial
+dimensions that and that six is a
+channel dimension. Um and of course
+we'll also uh you know just as we do
+with linear layers we'll often add a
+learnable bias vector as well to our
+convolutional layers. So that then in
+that sense is sort of in the in a linear
+layer a bias is one scaler per row in
+the in in the in the linear layer.
+Correspondingly in a convolutional layer
+we'll have typically one scalar bias
+value for every filter in our
+convolutional for every for every one of
+our convolutional filters. So that means
+that we'll have a sixdimensional bias
+vector in this in this setting. Yeah the
+question was clarifying three is the RGB
+channels. Yeah that's correct. Question
+is how do you get the filters back to
+the miracle of gradient descent and back
+propagation. Right. So the idea is that
+we're defining this operator. This
+operator is going to have an input image
+and a and a set of filters, but we but
+we no human is going to define what
+those filters are going to be. Instead,
+we're going to initialize those filters
+randomly and then they'll be learned via
+gradient descent um on whatever problem
+you're trying to solve. So that that's
+actually a really important thing to
+keep in mind and that that that gives
+these these layers their power is that
+we're defining this fairly
+computationally expensive layer but
+we're expecting that it'll be filled in
+with um with the data from our with the
+data and compute from our training.
+Question is how do you how do you set
+the five? Um that's a hyperparameter. So
+you know we talked about hyperparameters
+and cross validation a couple lectures
+ago. So these would be architectural
+hyperparameters that you would typically
+set via cross validation in some way.
+Yeah good question. Does it make sense
+to have different sizes of filters? So,
+as we'll see in the CNN architectures
+lecture next lecture, uh some actually I
+think you're going to talk about
+inception. Um sometimes you sometimes
+you actually do have that but that
+typically happens at the uh but um for
+there there's kind of a nice API design
+problem when you're designing what is
+the what is a primitive in your
+computational graph versus what is going
+to be an emergent structure built out of
+primitives. So in this case it's we
+usually define a single convolutional
+layer as having a fixed filter size
+because that makes it easier to compute
+and write efficient GPU kernels. But if
+you you can effectively have multiple
+multiply sized filters by stitching
+together a computational graph that
+combines convolution layers with
+different filter sizes in a larger
+network structure. So it's sort of yes
+and no is the answer to your question.
+The question is what are we learning? Um
+and this is very important to
+distinguish between a parameter versus a
+hyperparameter. So a hyperparameter is
+something that we set before we start
+training the network. So in this case,
+one one of the hyperparameters would be
+the number of filters and the size of
+those filters because those set the the
+shapes of our tensor, right? So then and
+a parameter is a value that we're going
+to set and optimize over the course of
+gradient descent. So in this case, the
+number of filters, the number of output
+channels, the size of those filters,
+those will be hyperparameters. We set
+those once before we start training. At
+the beginning of training, we'll
+randomly initialize the filters and then
+the value that will that will give us a
+fixed shape fixedsized tensor and then
+the values inside of that tensor will
+float around and change over the course
+of optimization. So that's the so then
+those are parameters because they get
+set via grad via gradient descent. Yes,
+the question is what gradient are we
+computing? Whenever you whenever you do
+back propagation, you're always
+computing gradient of the loss with
+respect to things inside the network. So
+in this case we'll be computing gradient
+of the loss with respect to the
+individual scaler with respect to our
+our convolutional filter weights. So
+that's basically saying you know what is
+a gradient that's saying for every
+individual scalar inside of every one of
+our filters if we wiggle that scaler a
+little bit then how much is the loss
+going to change. So then the gradient of
+the loss with respect we're always
+computing gradient of the loss with
+respect to our our convolutional
+filters. The question is basically like
+what do we do with the bias? So, so
+basically the bias would be added to
+each of our inner products, right? So,
+then we'll always compute like inner
+product of one of our filters against a
+chunk of the image and then add the
+corresponding scaler from the bias. The
+bias is is a is a vector, but the number
+of entries in the vector is equal to the
+number of filters. So then each each
+entry in the bias gets basically
+broadcast across the entire spatial
+dimension in the output. Um, but each
+bias only gets used for one bias gets
+used for one filter. So conceptually you
+basically one filter you slide
+everywhere that gives us a
+two-dimensional plane of activations
+right and then if you have a second
+filter you get a second plane of
+activations those are independent
+operators right like step one um slide
+first filter everywhere step two slide
+the second filter everywhere every
+filter gives rise to a plane um a plane
+of of a plane that we call an activation
+map and then we stack all of those up um
+and that's that's the operation of the
+convolution layer question is yeah
+basically after every gradient descent
+every time we do gradient descent sent
+um it's going to change the filters,
+right? So whenever you whenever you
+imagine training a neural network, it's
+always this loop of like while true get
+a batch of data, send your data through
+the network, forward pass, compute loss,
+um backward pass, compute gradient with
+respect to loss, and now make a gradient
+step using your optimizer. So then it's
+always going to be data forward loss
+backward step and then every time you do
+a step, it's going to make a change to
+the filters.
+All right, so I I I swung the other way.
+I said more questions. I got too many
+questions. Um but that's good. We'll
+we'll kind of equalize in here. Okay. So
+then uh we talked about the convolution
+layer. Um you know it's actually pretty
+common in the convolution layer to work
+on it in a batched mode. So rather than
+working on one input image, we'll
+actually work on a batch of input
+images. So this this is kind of nice cuz
+it makes everything four-dimensional.
+Now we have a four-dimensional tensor of
+inputs which is a set of input images.
+We have a four-dimensional tensor of
+filters which is a set of filters each
+of which is a threedimensional chunk of
+an image. And then the output is a
+four-dimensional uh is a
+four-dimensional tensor which is a set
+of outputs. Each output one output per
+image. Each images output is a
+three-dimensional tensor giving a stack
+of feature planes. Um you you have to
+start to think in lots of dimensions
+when you start to build neural networks.
+And that's actually kind of fun. Um so
+then here's kind of the general
+formulation of a convolution layer. um
+is that in general you're going to take
+as input a fourdimensional tensor of n
+by cn by h by w which is a set of n
+images. Each of those n images has c
+channels. Um for the case of an RGB
+image that'll be three but we might in
+general have more than c more than three
+channels. This could be arbitrary. Um
+and then h and w is the spatial size of
+our input images. Our convolutional
+filters will be a four-dimensional
+tensor of shape C out by C in by KW by
+KH. K C out is the number of filters.
+the number of output channels. Um CN is
+you know and then the rest of that are
+threedimensional filters. So it's a set
+of threedimensional filters. Um each
+threedimensional filter has shape C in
+by KW by KH. That's the kernel width and
+kernel height. And then we have C out
+such filters that could collect it into
+a four-dimensional tensor. And then as
+output we're going to produce a
+four-dimensional tensor again where the
+shape is N for the number of images one
+output per image. C out. Each of those
+outputs is going to consist of C out
+feature planes um one per filter. And
+then each of those planes is going to be
+H prime by WP prime. Um and this is kind
+of the general formulation of a con
+layer.
+And then a convolutional network is just
+a network is just a computational graph
+that includes a bunch of con layers. So
+in practice we'll tend to stack up a
+bunch of convolutional operators one
+after another. Um and in stacking a
+bunch of convolutional operators that
+will be that will be a convolutional
+network. Um so this was kind of a simple
+connet. You know we start with an image
+that's 3x 32x 32. Um then we have a con
+layer that has six filters. Each filter
+is 5x5x3. Then after we do the first
+convolution that gives us a new
+three-dimensional set of activations for
+that one image where it we have six
+channels that matches the six filters
+28x 28 because the spatial size changed
+a little bit through the convolution.
+Then we have another convolution that
+now has 10 filters which each of which
+is 5x 5x 6. So the 10 is going to give
+us the output dimen the output
+dimensions in the next layer of the
+convolution. Um and this six is going to
+be the number of channels that needs to
+match up the channel dimension here of
+the input to the convolution. Um so you
+can kind of see like you you can just
+stack up a bunch of these convolution
+layers and perform a lot of computation.
+But there's actually a problem in
+exactly this network archite
+architecture design. And can anybody
+spot it? sizing. Uh, that that's a
+problem. Not the one I had in mind. Are
+local. That's another good problem. Not
+the one I had in mind. Uh, actually
+those two we'll be able to fix pretty
+easily in a couple slides, but I had a
+different problem in mind. A lot of
+memory. Uh, that is a problem, but not
+one we can fix. You just got to buy a
+bigger GPU.
+Number of filters increases. Uh, I don't
+think that's a problem necessarily.
+That's okay. Ah, everything's linear.
+Yes, that is a problem. Right. So, we
+said that convolution was dot was
+dotproducts. Dot product is a linear
+operator. um composition of two linear
+operators is still a linear operator. So
+that means that if we have two
+convolution layers stacked directly on
+top of each other, they actually have
+the same representational power as a
+single convolution layer because because
+of the linearity of the operator. Um
+there's actually a very simple fix to
+that. Add an activation function.
+Exactly. So it's the same actually the
+same bug that we saw in multi-layer
+neural networks and the same fix. We
+need to add a nonlinear activation
+function in between our convolutional
+layers if we want. This introduces
+nonlinearity to the problem.
+nonlinearity to the to the to the
+network architecture and increases the
+representational power of the network
+that we're learning. So you know com in
+general com nets are going to be some
+stack of convolution layers
+nonlinearities and other kinds of other
+kinds of layers in our computational
+graph. There was a question earlier
+about what do the convolutional filters
+learn. Um this is basically we can view
+this by but by analogy with what we
+already did in linear classifiers. So in
+linear classifiers we have this
+intuition where each row could be
+visualized each row of the learned
+weight matrix could be thought of as a
+template that has the same shape as the
+whole input image. Now with a
+convolutional filter um you can you can
+think of it the same way but now each
+filter rather than extending over the
+entire spatial size of the input image
+is going to be just a small subpiece a
+sub chunk of an image. So we can
+actually visualize the first uh we can
+actually visualize the first layer
+convolution filters um of a trained
+neural network. So these are some these
+are the first layer convolution filters
+that are learned by an alexn net
+architecture that was trained for image
+classification on imageet. Um and here
+each of these are basically little
+chunks of RGB images. These are the
+little templates that get slid around
+the input image in the first layer of
+the alexnet architecture. Um, and you
+know, the fact that this was AlexNet,
+the fact that this was trained on
+imageet, the fact that this was
+classification, um, it turns out just
+about all convolutional networks end up
+learning filters that look something
+like this, um, on almost all problems
+and almost all data sets and tasks as
+long as they're sort of reasonable
+tasks. Um, and the the thing we see is
+that we often learn two kinds of filters
+in here. Um, one tends to be looking for
+colors, especially opposing colors. So,
+you'll see like this one is looking for
+a contrast between green and red. We
+also see colored blobs like pink and
+green blobs. And the other category of
+filter we tend to see are looking as
+looking for somehow the spatial
+structure of the images. So like this
+one is looking for a vertical edge, a
+horizontal edge. These are this one is
+looking for a vertical edge. Some of
+these are looking for a diagonal edg
+edges. So they tend to look for colors
+and edges um and like these little these
+in these little local neighborhoods of
+our input images. Um, so we can play
+this trick on the first layer of the
+convolutional filter and just visualize
+them directly as images. It gets a
+little bit trickier to visualize the
+higher layers in the network. Um, and I
+I'm not going to explain this figure.
+I'm just going to present it without too
+much too much explanation. But, um,
+higher layers of the network tend to
+learn larger spatial structures of our
+input image. Um here the visualization
+is like each row represents a filter in
+in a learned network and each column
+represents some piece of an input image
+that that filter was responding strongly
+to. So the the visualization here is is
+a bit different than the previous slide.
+Um so these are all basically chunks of
+input images that a filter was
+responding to. And here you can see that
+this sixth layer convolution, one of
+these filters feels like it's responding
+maybe to eyes. This one looks like maybe
+it's responding to pieces of text. Um,
+this one looks like maybe it's
+responding to wheels or or circles or
+top halves of circles, something like
+that. Um, and again like these this all
+sort of gets driven via gradient descent
+via training on your large scale data
+sets via gradient descent. Uh, nobody's
+sort of sitting down and designing these
+filters by hand. Um, and like I said,
+visualizing these higher layer filters
+is a bit tricky and more involved.
+Question was um, if you if you if you
+look at all the responses to the
+filters, can you reconstruct the
+original image? Actually, it turns out
+you can do that. And the trick that and
+the way that you do that is also
+gradient descent. Um gradient sense is
+really powerful and that's something
+that we'll talk about I think in a
+couple more lectures on some some
+mechanisms that do that. Oh that's a
+good question. How do you how do the how
+do the filters get differentiated? um
+that actually comes down to the random
+initialization, right? So then it's
+really important that the way you
+initialize your filters um is random and
+and they have and and crucially that you
+have a different initialization for each
+filter when you start training your
+network. Um because that's going to
+break the symmetry between the filters,
+right? Because if all the filters are
+exactly the same, um the loss is the
+same, then that gradient is going to
+broadcast back and be the same on all
+the filters. So if you initialize them
+the same, they will stay the same. Um
+but if you initialize them to be
+different, then you'll break the
+symmetry and they can learn different
+features.
+>> Yeah. Basically the the the human
+designer of the network needs to write
+down what is the sequence of operators
+and the sequence of channels and that's
+the question of neural network
+architecture design that we'll talk a
+little bit more about in the next
+lecture.
+Good question is how do we like why is
+it the deeper layers visualize larger
+structures that actually has a bit to do
+with the receptive fields that we have a
+slide on in a couple in a in a little
+bit. So maybe maybe we'll get there and
+I think a couple more some of these
+questions will get answered. Um so one
+thing that already came up is how do we
+look at the spatial dimensions of these
+convolutions? Um so I wanted to take a
+take a look a closer look at exactly how
+we compute the spatial dimensions of our
+convolutions. Right? So in this case um
+here we've taken this picture of a con
+this picture of a convolution. We're
+rotating at 90° and dropping the channel
+dimension. So now the channel dimension
+is going into the board. Um and then we
+have our 7x7 spatial dimensions. So here
+we're looking at an input that's 7 by 7
+in spatial size and we have a 3x3 com
+kernel. And then the question is how big
+is our output going to be here?
+Well, 1 2 3 4 5, right? So, our output
+is going to be 5 by five because we can
+slide that filter and plop it down in
+five different spaces. Um, and then we
+can generalize it, right? If our input
+has has length w, our com filter has
+length k, then our output is going to be
+w minus k + one. And you can sit down
+and convince yourself that that's the
+right formula. Um, but there's kind of a
+problem that actually a couple people
+already pointed out is that your feature
+maps are going to shrink in spatial size
+as you go through this convolution. um
+that's kind of annoying. Um it's
+actually like you could actually work
+with that and there are some neural
+network architectures that deal with
+that. But sometimes we're lazy and we
+just want to keep the same size for
+everything because that's just basically
+simpler for human designers to think
+about. Um and one trick that we do there
+is something called padding. So here
+it's common to add additional data like
+virtual data around the input of your
+around your true input data um that
+you're going to like basically add extra
+zeros um around before you compute the
+convolution operator. Um and now in this
+this basically lets us solve this
+shrinking feature map problem because
+now if we have um you know add padding
+of P in this case we have padding P
+equals 1. So we're adding one pixel of
+zeros all around everywhere then we we
+basically add 2 P to our output size. So
+in particular if you have a three if you
+have like a 3x3 con and you add padding
+of one then your your feature map is
+going to stay the same size and that's
+convenient. Um now if you've taken
+signal processing there actually are
+some problems here right like this can
+lead to weird weirdness in from a signal
+processing perspective but we'll ignore
+that and we'll just look at the sizes
+sizes and shapes of the tensors because
+that's that's a little bit easier to
+comprehend but be aware like why are we
+putting zeros is that going to cause
+problems yes it is going to cause
+problems on the borders but it seems to
+be okay in a lot of cases
+okay yeah so then like I said a pretty
+common setting is to set p is to have
+actually k be an odd number um and then
+have P be k minus 1 /2 because that's
+going to mean that your your your your
+spatial size after convolution is the
+same as the spatial size before the
+convolution.
+Okay. Then the next interesting thing to
+think about is this notion of receptive
+fields. Someone was asking a little bit
+uh over here why do the deeper layers
+learn larger structures? That's actually
+sort of inherent in the way that
+convolutions are built. Right? So in
+thinking about a single convolution um
+each output is looking at this local
+region of an input. Right? So by design
+the output of one convolution at the
+first layer can only be looking at a
+piece of the image which is the same
+size as the convolutional kernel that
+you're learning. But if we build a
+convenant that's stacking multiple
+convolutions on top of each other then
+these receptive fields get magnified
+through the network. So then you in this
+case we're looking at a at a network
+with three convolution layers and we see
+that um in the in the final layer of
+activations each entry here depends on a
+local region in the in the in the layer
+before it. But each one of those entries
+depends in turn on a local region in the
+layer before it which depends in turn on
+a local region in the layer before it.
+So when you have these convolutions,
+even though each individual convolution
+is looking at a local neighborhood in
+the layer before it, as you stack up
+convolutions in a bunch of layers, then
+the effective size of the original input
+that each of those convolutions is
+looking at grows in the grows over the
+course of the network. And in
+particular, um this this uh this this we
+call the effective receptive field. So
+the effective receptive field of a
+convolution is basically how many pixels
+in the original image um had the
+opportunity to influence um one one
+activation of the network you know later
+on downstream.
+And you'll notice that the convolution
+actually the this effective receptive
+field basically grows linearly with the
+number of convolution layers. Um, and
+there's a potential problem here is
+because ultimately when we make
+classification decisions at the end of
+our network, we would like our
+classification decisions to basically
+aggregate global information across the
+entire image. Um, but you need a lot of
+comp layers to do it. So a trick there
+is um basically to add some kind of way
+to increase effective receptive fields
+more quickly. One way that we can do
+this in convolution is by introducing
+something called a stride. So here what
+we're saying is that rather than placing
+the filter everywhere in the image,
+we're going to skip some. So we're going
+to instead of moving the field moving
+the receptive field with one, we're
+going to stride it by two instead. So
+now in this case, we go back to our 7x7
+input 3x3 con do a stride two. Now
+what's the output size? 1 2 3 3x3. Um
+and then in general if we have our input
+W filter size K padding of P stride S
+then we get this kind of ugly formula
+for the size of the output W minus K.
+The uh bigger kernels shrink the input
+plus 2 P um padding adds back some of
+the missing size divided by the stride.
+The stride you know divides the input
+shape and then plus one because that's
+how because of some fence post fence
+post math.
+Okay. So then the strided convolutions
+are interesting because if you go back
+to this picture now when we do a strided
+convolution it's effectively
+downsampling the image inside the neural
+network. So then when we have a strided
+convolution then each con layer is
+effectively like dividing the the shape
+of the feature map usually by two and
+then when we stack these that means that
+now you can get exponential growth in
+the effective receptive field. So if you
+stack you know a bunch of con players
+and each of those con layers is actually
+downsampling by a factor of two. Then if
+you run through a similar exercise
+you'll see that that the effective
+receptive field is now growing
+exponentially in the depth of the
+network. So that means that with very
+with relatively few layers we can build
+up a very large effective receptive
+field that looks at the entire input
+image.
+Um okay so here let's work through just
+one one example to make sure that we all
+are on the same page about convolution.
+So here let's think about an input
+volume 3x 32x32. Let's think about a
+convolution layer with 10 filters. Each
+of those filters is 5 x5 um with stride
+one pad 2. What's the size of the
+output? I color coded it because there's
+a lot of numbers here to keep to keep
+track of. Right? So here um it's 10 x
+32x 32. This 32 is actually a different
+32 than this 32. So that's why they're
+different colors of blue. Um right, but
+this 10 is the number of output
+channels. Output channels has to match
+the number of filters. Um and the
+spatial size is computed using that
+formula that we just saw. So then the
+input spatial size comes down here. Um
+plus two plus the padding comes down
+here. Padding adds the spatial size. Um
+five is the convolutional kernel that
+divides the spatial size. Stride of one.
+So that's trivial. And then add one. And
+this just so happens to come out to 32.
+Um so in this case this follows the same
+pattern that we talked about a couple
+slides ago where it's a five where it's
+an oddshaped convolutional kernel. In
+this case five, the padding is 2. So if
+the kernel size is is 2k + one then
+padding of k means we maintain the same
+spatial size
+number of learnable parameters here
+maybe I'll just go through these cuz uh
+we have a couple more slides to get
+through um so here um in this case
+number of learnable parameters is 760
+because we have um each filter is
+basically 3x5 x5 um and we have one for
+the bias so we have 76 learnable
+parameters per filter we have 10 filters
+so it's 760 multiple 760 learnable
+parameters here. We can also compute the
+number of multiply ad operations. How
+much compute does this convolution
+kernel how much compute does this
+convolution operator take? So here it's
+it's a lot seven. Well, is it a lot? I
+don't know. I don't have a lot. You may
+not you may or may not have a lot of
+intuition for what is a lot of
+computation. But in this case, um the
+way that I think about computing how
+many flops, how much how much compute
+does a convolution operator take. We
+think about the output volume size is
+10x 32x 32. And we know that each entry
+in that output volume was computed via a
+dot productduct. A dot productduct in
+particular between one of our filters
+and a chunk of our input. So in this
+case we know the total flops because we
+know the number of outputs is 10 x 32x
+32 which is about 10,000. And then each
+of those outputs is computed via a
+dotproduct of a 3x5x5 um filter and a
+3x5x5 chunk of the image. So that's 75
+elements. So um multiplying those
+together together means it takes about
+768,000 floating point uh multiply ad
+operations.
+Okay. So then here's the kind of oneline
+sum one one slide summary of
+convolution. I'm not going to walk
+through this. This is more for your for
+you to look at later but this just
+summarizes all the hyperparameters and
+the formulas associated with convolution
+layers. Um if you look in PyTorch,
+PyTorch is the deep learning framework
+that a lot of people use. Um there
+you'll see um this convolution layer has
+all these hyperparameters that we talked
+about. There's a couple other
+interesting hyperparameters that we
+didn't talk about called group groups
+and dilation. Um dilation isn't really
+used so much anymore. Groups still get
+used sometimes. Um and but maybe we'll
+talk about those in a later lecture. Um
+you can have other kind other kinds of
+convolutions too. Um so we talked about
+2D convolution. We can also do 1D
+convolution. um where rather than having
+a two-dimensional signal that we slide a
+filter over, we now have a two like a
+one-dimensional signal that we slide a
+filter over in one with one degree of
+freedom or a threedimensional
+convolution where we have a
+three-dimensional signal, a
+three-dimensional filter and now you can
+slide that filter everywhere in 3D space
+to convolve with the input signal. So
+this idea of a convolution really
+extends beyond just two dimen two
+dimensional images.
+Okay, that's basically all about
+convolution. Um and the last one is
+pooling. Thankfully, pooling is pretty
+simple. So, pooling layers are basically
+another way to downsample inside of your
+neural network. So, we saw that strided
+convolution is one way that we can down
+sample inside of a neural network. And
+down sampling is useful because it lets
+us build up receptive fields more
+quickly as we go through the through the
+depth of the network. Um, but
+convolution actually still costs quite a
+lot of computation. So, convolution, you
+know, is where the most of the most of
+the flops, most of the compute happens
+in a convolutional network. And pooling
+layers are basically a way to downsample
+um that's very very cheap that doesn't
+cost a lot of compute. And the idea in
+in a pooling layer is given our
+three-dimensional tensor um where in
+this case 64x12 x112 you should think
+about that as um a spat like a
+threedimensional volume of features
+where the spatial size is 112 x12 and we
+have 64 planes 64 channels of
+activation. So now what we're going to
+and each one of those planes is a is a
+112 x12 image. But then what we're going
+to do is take each one of those
+individual feature planes, pull it out
+from our input tensor and down sample
+them independently and then restack them
+to compute the output. So then this uh
+input 64x224 x 224, we're going to pull
+out each of those 224 x24 planes
+independently down sample it and then
+restack them to give an same number of
+channels um but change in the spatial
+size. What is the method we use for
+downsampling? Great question. Um so uh
+the way there's actually that's actually
+a hyperparameter. There's a couple
+different mechanisms of downsampling
+that we use. Um, one of the common one,
+one of the most common ones to use is
+actually max is called max pooling. Um,
+so in max pooling, what we're going to
+do is um take our single depth slice,
+divide it up into non-over overlapping
+regions. In this case, these are two uh
+and and we often use and we use the same
+terminology to talk about these as we do
+with convolution. So this we this we
+could say it's a kernel size 2x two with
+stride of two um because that that then
+that divides our inputs into these
+non-over overlapping 2x2 tiles. Then
+within each of those non-over
+overlapping 2x two tiles, we'll take the
+max entry. In this case, it's a 6, 8, 3,
+4. So then you take the max entry inside
+each of those. And then that and then
+that that gives us our spatial
+compression. Um, and there's a whole you
+can imagine a whole set of
+hyperparameters here. You could say what
+is the kernel size? You could change the
+kernel size. You can change the stride.
+You can also change the function that we
+use for downsampling. Um, max pooling is
+pretty common. You'll also see average.
+You'll also see anti-alias downpooling
+sometimes. Um, so these are all just
+ways that you can downsample these
+feature maps one at a time. Uh, good
+question. Do we make a use of padding?
+Um, typically you do not use padding
+inside of inside of pooling layers. Um,
+there's nothing mathematically
+preventing you from doing so. Um, but in
+the case of max pooling, it would be
+kind of silly. It's basically equivalent
+to aru. Um, and when so whenever you're
+using max pooling, if you're also using
+aru, that would be redundant. Um, so
+typically we don't use padding in in
+pooling layers. I'm actually not sure if
+PyTorch has a flag for pooling for
+padding or not in in pooling layers.
+Yeah. So the the stride would be another
+one of these architectural
+hyperparameters. Um but usually you
+don't tune these things too much. Um
+usually the intuition behind a pooling
+layer like honestly the most common is I
+want to down sample my I want to
+downsample everything by a factor of two
+is the mo is like by far the most common
+operation. So then the most common thing
+to do would be 2x two stride 2.
+Sometimes you'll do like two 4x4 stride
+two, but basically the most common
+settings by far is I want to down sample
+my everything by a factor of exactly
+two. Oh, that's a very good question.
+Uh, do images all have to be the same
+input size? Um, in all the language that
+we're talking about so far, yes. Um,
+you're going to run into big problems if
+your image if your input images are not
+the same size. So then things that
+you'll typically do to fix that would be
+like one you either resize all your
+images to the exact same size before you
+batch them to feed to the network. Um
+sometimes you'll also pad your images
+out with zeros or some other value to
+make them all the same size but now
+padded rather than warped. Um or you
+need to basically run these layers
+independently for images of different
+aspect ratios. Um so that's another
+thing that you'll do sometimes um in
+more sophisticated training setups is
+that sometimes you'll do what's known as
+like aspect ratio bucketing. So then
+from your training data you'll bucket
+them into different aspect ratios and
+then each forward backward pass of the
+network will be on a on a batch of
+images of the same resolution and aspect
+ratio but then each iteration you might
+grab images with different resolutions
+or aspect ratios but that's something
+that you'll see in some of the more
+common larger production systems. Yeah.
+So the question is where do you put
+these? Um these are usually interspersed
+with the convolution layers. So a pretty
+common architecture a pretty common
+pattern for comn nets is to intersperse
+the convolution and pooling. So for
+example, you'll see like com pool comcom
+pool comcom pool fully connected fully
+connected is kind of a prototypical
+convolutional network.
+>> Yes, that's an extra excellent question.
+Does this introduce nonlinearity? So it
+depends on the type of pooling operation
+that you're using. So if you're doing
+max pooling that's a nonlinearity. So um
+in some networks if you have a max
+pooling you may you may not use a relu
+around that convolution because a max
+pooling is a nonlinearity itself. If
+it's an average pooling, um, that's also
+a linear operator. So then if you do
+average pooling, it's linear. So then
+you probably still would want a relu
+there.
+Okay. So then here's my my quick oneside
+summary of pooling. Um, it's basically
+the same hyperparameters as convolution.
+Um, except you've got this extra pooling
+function which is what is the mechanism
+you're using to do the downsampling.
+Um, then the last thing I wanted to
+mention is this notion of translation
+equivariance. What the hell is that? Um,
+so I said at the beginning of the of the
+beginning of the lecture that we wanted
+operators that are respecting the
+spatial structure of our images, right?
+And that we have this notion that
+flattening our images into big vectors
+is somehow not respecting the spatial
+structure of of our images. So there's a
+really interesting property that is
+shared by both convolution and pooling
+which is one way to more for to
+formalize this notion of them respecting
+the 2D spatial structure of the images
+and that's this notion of translation
+equariance. So it sounds like it sounds
+pretty crazy but the idea is we can
+imagine two different operators uh two
+different branches um along one branch
+we can imagine taking our image doing a
+convolution or pooling operator to get
+an updated image and then translating
+the result by shifting that feature map
+to the side by for example then you
+could imagine changing the order of
+these two things instead. What we could
+have done instead is first translate the
+image and then do our convolution or
+pool operator on top of the translated
+image. And it and it just so happens
+that in this case the order doesn't
+matter. If you translate and then
+convolution, you get the same result as
+if you had done convolution and then
+translate um subject to some boundary
+conditions blah blah blah blah blah.
+like in in sort of the limit of
+infinitely large images and blah blah
+blah blah blah ignoring this ignoring
+some of these technical conditions. Um
+it's really interesting that you can
+actually swap the order of translation
+in space versus performing these these
+downsampling or convolution operators.
+Um and that bakes in an important
+intuition about images which is that
+when we're processing images um pro we
+the the features that we extract from an
+image should only depend on the content
+of the image and should not depend on
+where in the image that where the
+absolute location in the image that
+content came from. So that means that
+you know if I'm looking this way it
+looks like people it looks like people
+and benches. If I'm looking this way it
+looks like people and benches. and the
+fact that it's over here on my right and
+the fact that it's over here on my left,
+I want to process that data in the exact
+same way. And that's an important um
+intuition, an important structure of
+that we want to of of images and of the
+kind of 2D data that we're processing.
+And the and this notion of translation
+equariance basically is a way to
+mathematically describe how that
+structure is baked into these operators.
+Um so this is kind of interesting um
+that it's it's a way that we can build
+in our intuition about how images ought
+to be processed um through the design of
+our operators not through the design of
+our of our feature extraction methods as
+we saw at the beginning. The question is
+why do you do a translation? You you
+don't like this is not something you're
+actually going to do. Um this is
+basically a mathematical cur curiosity,
+right? To be clear that you should not
+generally do this inside of your neural
+networks. Um this is basically like it's
+interesting to note that this happens to
+be true but you would not do this inside
+of your neural networks.
+Um and if you if you were a
+mathematician you call this a commutive
+diagram and mathematicians love those
+things.
+Okay so that's basically the summary of
+today. Um we talked about convolutional
+networks. We talked about you know why
+they're interesting. We talked about
+these two new operators of convolution
+and pooling. And then next lecture we'll
+see how to stitch those together into
+CNN architectures. Um and see you next
+time for that.
